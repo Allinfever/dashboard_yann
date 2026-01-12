@@ -1,0 +1,223 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 2rem;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+}
+
+.resetBtn {
+    padding: 0.6rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: #fff;
+    font-weight: 600;
+}
+
+.resetBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ganttContainer {
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-lg);
+    background: rgba(15, 17, 26, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.monthsHeader {
+    display: flex;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.labelColumn {
+    width: 220px;
+    min-width: 220px;
+    padding: 1.25rem 1.5rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+}
+
+.monthsGrid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    flex: 1;
+    min-width: 1000px;
+}
+
+.monthCell {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.monthCell:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.groupSection {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.groupHeader {
+    padding: 1rem 1.5rem;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 6px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.itemRow {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    transition: background 0.2s;
+}
+
+.itemRow:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.itemLabel {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.barContainer {
+    flex: 1;
+    min-width: 1000px;
+    position: relative;
+    height: 60px;
+}
+
+.gridLines {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.gridLine {
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.bar {
+    position: absolute;
+    top: 18px;
+    height: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.bar:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.2);
+}
+
+.barLabel {
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 1rem;
+}
+
+.milestone {
+    position: absolute;
+    top: 15px;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+
+.milestone::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--color-amber), #d97706);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    border: 3px solid #0d1117;
+}
+
+.milestone.dashed::before {
+    background: transparent;
+    border: 3px dashed rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+.milestoneLabel {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modal */
+.modalOverlay {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.modal {
+    background: #0d1117;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2.5rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 0.75rem;
+    border-radius: 8px;
+}

@@ -1,0 +1,58 @@
+.container {
+    /* background-color: var(--bg-card);  Optional: keep it transparent or white */
+    background-color: transparent;
+    padding: 0 0;
+    /* Align with content */
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tabsList {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+    overflow-x: auto;
+    /* Handle overflow gracefully */
+}
+
+.tabItem {
+    position: relative;
+    white-space: nowrap;
+}
+
+.tabButton {
+    display: block;
+    background: none;
+    border: none;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+    font-family: inherit;
+}
+
+.tabButton:hover {
+    color: var(--color-slate-800);
+}
+
+.active {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    /* Align with container border-bottom */
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-primary);
+    border-radius: 2px 2px 0 0;
+}

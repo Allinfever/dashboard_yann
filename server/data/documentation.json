@@ -1,0 +1,24 @@
+{
+  "spaces": [
+    {
+      "id": "default",
+      "name": "Général",
+      "order": 0,
+      "createdAt": "2026-01-06T05:47:15.565Z"
+    }
+  ],
+  "items": [
+    {
+      "id": "d319550d-6032-4904-a7bd-055daa0e81f6",
+      "spaceId": "default",
+      "view": "general",
+      "title": "Mantis",
+      "type": "url",
+      "url": "https://mantis.stms.fr/view_all_bug_page.php?refresh=true",
+      "description": "",
+      "tags": [],
+      "createdAt": "2026-01-06T05:47:15.566Z",
+      "updatedAt": "2026-01-06T05:47:15.566Z"
+    }
+  ]
+}

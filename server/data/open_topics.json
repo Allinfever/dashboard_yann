@@ -1,0 +1,17 @@
+[
+  {
+    "id": "71984ac4-cac2-4aae-b6ab-f0fc41ca2483",
+    "title": "Amélioration de l'app",
+    "summary": "",
+    "description": "1. lorsque j'actualise les Mantis, les priorité ne se mettent pas à jour. Il faut revoir le système de mise à jour des Mantis et de leur priorité.",
+    "status": "Backlog",
+    "priority": "P4",
+    "owner": "",
+    "tags": [],
+    "dueDate": null,
+    "links": [],
+    "attachments": [],
+    "createdAt": "2026-01-07T06:28:45.488Z",
+    "updatedAt": "2026-01-07T06:28:45.488Z"
+  }
+]
