@@ -5,9 +5,14 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy-dashboard-yann-main
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
