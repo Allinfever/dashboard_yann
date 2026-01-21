@@ -918,12 +918,62 @@ app.get('/api/mantis/extract-download/:jobId', (req, res) => {
     const job = extractJobs.get(req.params.jobId);
     if (!job || job.status !== 'completed') return res.status(404).json({ error: 'Result not ready or job not found' });
 
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename=mantis_extract_${job.domain}_${Date.now()}.json`);
-    res.send(JSON.stringify(job.data, null, 2));
+    const now = new Date().toISOString().split('T')[0];
+    let md = `# Extraction Mantis - Domaine ${job.domain} - le ${now}\n\n`;
+    md += `*Généré par Dashboard Deloitte - Yann Deschamps*\n`;
+    md += `*Nombre de tickets : ${job.data.length}*\n\n`;
+    md += `---\n\n`;
 
-    // Clean up job memory after download
-    // extractJobs.delete(req.params.jobId);
+    job.data.forEach(issue => {
+        const id = issue['Identifiant'] || issue['id'];
+        const summary = issue['Résumé'] || issue['summary'] || 'Sans titre';
+        const d = issue.full_details || {};
+
+        md += `## [${id}] ${summary}\n\n`;
+
+        // Metadata Table-like list
+        md += `### Informations Générales\n`;
+        md += `- **ID**: ${id}\n`;
+        md += `- **Domaine**: ${issue['Domaine (Toray)'] || 'SD'}\n`;
+        md += `- **Catégorie**: ${issue['Catégorie'] || 'N/A'}\n`;
+        md += `- **État**: ${issue['État'] || issue['Etat'] || 'N/A'}\n`;
+        md += `- **Affecté à**: ${issue['Affecté à'] || 'N/A'}\n`;
+        md += `- **Date soumission**: ${issue['Date de soumission'] || 'N/A'}\n`;
+        md += `- **Mise à jour**: ${issue['Mis à jour'] || 'N/A'}\n`;
+        md += `- **Priorité**: ${issue['priorite_p'] || 'N/A'}\n\n`;
+
+        if (d.description) {
+            md += `### Description\n${d.description}\n\n`;
+        }
+        if (d.steps_to_reproduce) {
+            md += `### Étapes pour reproduire\n${d.steps_to_reproduce}\n\n`;
+        }
+        if (d.additional_info) {
+            md += `### Informations supplémentaires\n${d.additional_info}\n\n`;
+        }
+
+        if (d.notes && d.notes.length > 0) {
+            md += `### Historique des Notes (${d.notes.length})\n\n`;
+            d.notes.forEach((note, idx) => {
+                md += `> **${note.author || 'N/A'}** (${note.date || ''})\n`;
+                md += `> ${note.text}\n\n`;
+            });
+        }
+
+        if (d.attachments && d.attachments.length > 0) {
+            md += `### Pièces jointes\n`;
+            d.attachments.forEach(att => {
+                md += `- ${att.name} (Lien : ${process.env.MANTIS_BASE_URL}/${att.url})\n`;
+            });
+            md += `\n`;
+        }
+
+        md += `---\n\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename=mantis_extract_${job.domain}_${now}.md`);
+    res.send(md);
 });
 
 // ============================================================
