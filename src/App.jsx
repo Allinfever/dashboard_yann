@@ -7,6 +7,7 @@ import MantisPage from './pages/MantisPage';
 import OpenTopicsPage from './pages/OpenTopicsPage';
 import OpenTopicDetailPage from './pages/OpenTopicDetailPage';
 import DocumentationPage from './pages/DocumentationPage';
+import MantisExtractorPage from './pages/MantisExtractorPage';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path="/open-topics" element={<OpenTopicsPage />} />
           <Route path="/open-topics/:id" element={<OpenTopicDetailPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
+          <Route path="/mantis-extractor" element={<MantisExtractorPage />} />
         </Routes>
       </MainLayout>
     </Router>

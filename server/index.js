@@ -249,6 +249,83 @@ const writeCacheAtomic = (data, summary) => {
     fs.renameSync(tempFile, CACHE_FILE);
 };
 
+// --- Full Extraction Jobs State ---
+let extractJobs = new Map();
+
+/**
+ * Scrapes a single Mantis issue page for full details (description, notes, attachments)
+ */
+async function fetchFullIssueDetails(mantis, issueId) {
+    try {
+        const res = await mantis.request('GET', `/view.php?id=${issueId}`);
+        const $ = cheerio.load(res.data);
+
+        const details = {
+            id: issueId,
+            description: '',
+            steps_to_reproduce: '',
+            additional_info: '',
+            notes: [],
+            attachments: []
+        };
+
+        // Extracting Description, Steps, Additional Info
+        // Mantis uses <tr><td class="category">Label</td><td>Value</td></tr>
+        $('td.category').each((i, el) => {
+            const label = $(el).text().trim().toLowerCase();
+            const value = $(el).next().text().trim();
+            if (label.includes('description')) details.description = value;
+            else if (label.includes('reproduire') || label.includes('steps to reproduce')) details.steps_to_reproduce = value;
+            else if (label.includes('informations supplémentaires') || label.includes('additional information')) details.additional_info = value;
+        });
+
+        // Extracting Attachments
+        // Usually in a table with ID "attachments" or similar
+        $('#attachments, table:contains("Fichiers attachés"), table:contains("Attached Files")').find('tr').each((i, row) => {
+            const links = $(row).find('a');
+            links.each((j, link) => {
+                const href = $(link).attr('href');
+                const text = $(link).text().trim();
+                // We want links that look like download links
+                if (href && (href.includes('file_download.php') || href.includes('download') || href.includes('plugin.php'))) {
+                    // Check if it's not a generic action link
+                    if (text && !['[Détacher]', '[Supprimer]', 'Détacher', 'Supprimer'].includes(text)) {
+                        details.attachments.push({ name: text, url: href });
+                    }
+                }
+            });
+        });
+
+        // Extracting Notes
+        // Modern Mantis uses class .bugnote
+        $('.bugnote').each((i, el) => {
+            const author = $(el).find('.bugnote-note-public, .bugnote-note-private, .bugnote-author').first().text().trim().replace(/\s+/g, ' ');
+            const date = $(el).find('.bugnote-date').text().trim();
+            const text = $(el).find('.bugnote-text').text().trim();
+            if (text) {
+                details.notes.push({ author, date, text });
+            }
+        });
+
+        // Fallback for older Mantis versions or different themes
+        if (details.notes.length === 0) {
+            $('table.width100 tr').each((i, row) => {
+                const td = $(row).find('td');
+                if (td.length === 2 && ($(td[0]).hasClass('bugnote-public') || $(td[0]).hasClass('bugnote-private'))) {
+                    const author = $(td[0]).text().trim().replace(/\s+/g, ' ');
+                    const text = $(row).next().find('td').text().trim();
+                    if (text) details.notes.push({ author, text });
+                }
+            });
+        }
+
+        return details;
+    } catch (e) {
+        console.error(`[FullScraper] Failed for #${issueId}:`, e.message);
+        return null;
+    }
+}
+
 app.get('/api/mantis/health', (req, res) => {
     const rid = `health-${Date.now()}`;
     logger.info(rid, '/api/mantis/health', 200, 'Health check OK');
@@ -745,6 +822,108 @@ app.get('/api/mantis/priority-p', async (req, res) => {
     } catch (e) {
         res.status(500).json({ error: e.message, requestId: rid });
     }
+});
+
+// --- FULL EXTRACTION ENDPOINTS ---
+
+app.post('/api/mantis/extract-full', async (req, res) => {
+    const { domain } = req.body;
+    if (!domain) return res.status(400).json({ error: 'Domain is required' });
+
+    const jobId = `extract-${domain}-${Date.now()}`;
+    const mantis = new MantisClient(jobId);
+
+    extractJobs.set(jobId, {
+        status: 'running',
+        progress: 0,
+        step: 'Initialisation...',
+        domain,
+        startTime: new Date().toISOString(),
+        data: [],
+        current: 0,
+        total: 0
+    });
+
+    res.json({ jobId });
+
+    // Background process
+    (async () => {
+        try {
+            const cache = readCache();
+            if (!cache || !cache.data) throw new Error('Cache Mantis non disponible. Veuillez synchroniser Mantis d\'abord via l\'onglet Mantis.');
+
+            const issues = cache.data.filter(row => {
+                const dom = (row['Domaine (Toray)'] || row['domaine'] || '').toString().trim().toUpperCase();
+                return dom === domain.toUpperCase();
+            });
+
+            if (issues.length === 0) throw new Error(`Aucun ticket trouvé pour le domaine ${domain}`);
+
+            const job = extractJobs.get(jobId);
+            job.total = issues.length;
+
+            await mantis.login();
+
+            // Progress with controlled concurrency to avoid overwhelming Mantis
+            const concurrency = 3;
+            for (let i = 0; i < issues.length; i += concurrency) {
+                const chunk = issues.slice(i, i + concurrency);
+                await Promise.all(chunk.map(async (issue, idx) => {
+                    const idAttr = issue['Identifiant'] || issue['id'];
+                    const numericId = idAttr.replace(/^0+/, '');
+
+                    const details = await fetchFullIssueDetails(mantis, numericId);
+
+                    if (details) {
+                        job.data.push({
+                            ...issue,
+                            full_details: details
+                        });
+                    }
+
+                    job.current++;
+                    job.progress = (job.current / job.total) * 100;
+                    job.step = `Extraction #${idAttr} (${job.current}/${job.total})`;
+                }));
+            }
+
+            job.status = 'completed';
+            job.step = 'Extraction terminée';
+            job.endTime = new Date().toISOString();
+
+        } catch (e) {
+            console.error(`[ExtractJob] ${jobId} failed:`, e.message);
+            const job = extractJobs.get(jobId);
+            if (job) {
+                job.status = 'failed';
+                job.error = e.message;
+                job.step = 'Erreur: ' + e.message;
+            }
+        }
+    })();
+});
+
+app.get('/api/mantis/extract-status/:jobId', (req, res) => {
+    const job = extractJobs.get(req.params.jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    res.json({
+        status: job.status,
+        progress: job.progress,
+        step: job.step,
+        error: job.error
+    });
+});
+
+app.get('/api/mantis/extract-download/:jobId', (req, res) => {
+    const job = extractJobs.get(req.params.jobId);
+    if (!job || job.status !== 'completed') return res.status(404).json({ error: 'Result not ready or job not found' });
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=mantis_extract_${job.domain}_${Date.now()}.json`);
+    res.send(JSON.stringify(job.data, null, 2));
+
+    // Clean up job memory after download
+    // extractJobs.delete(req.params.jobId);
 });
 
 // ============================================================

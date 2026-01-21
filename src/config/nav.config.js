@@ -46,6 +46,13 @@ export const navConfig = [
       { id: 'technical', label: 'Technique' },
       { id: 'processes', label: 'Processus' }
     ]
+  },
+  {
+    id: 'mantis-extractor',
+    path: '/mantis-extractor',
+    label: 'Mantis & Notes Extractor',
+    icon: '📥',
+    tabs: []
   }
 ];
 
