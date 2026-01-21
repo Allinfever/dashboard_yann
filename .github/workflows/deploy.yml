@@ -15,9 +15,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: sudo /usr/local/bin/dashboard-deploy
+          script: |
+            sudo /usr/local/bin/dashboard-deploy
