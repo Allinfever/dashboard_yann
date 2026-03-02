@@ -459,6 +459,44 @@ app.get('/api/mantis/kpis', (req, res) => {
         const evolutionDataWeekly = Object.values(evolutionWeekly).sort((a, b) => a.label.localeCompare(b.label));
         const evolutionDataMonthly = Object.values(evolutionMonthly).sort((a, b) => a.label.localeCompare(b.label));
 
+        // Evolution creations SD only
+        const sdEvolutionWeekly = {};
+        const sdEvolutionMonthly = {};
+
+        const sd_items = all_except_rdd.filter(row => {
+            const category = (row['Catégorie'] || '').trim();
+            const domaine = (row['Domaine (Toray)'] || '').trim();
+            return category === 'SD' || domaine === 'SD';
+        });
+
+        sd_items.forEach(row => {
+            const submitDate = row['Date de soumission'];
+            const isValidated = isKpiValidated(row);
+            const week = getWeekStart(submitDate);
+            const month = getMonthStart(submitDate);
+
+            if (week && new Date(week) >= historyLimit) {
+                if (!sdEvolutionWeekly[week]) sdEvolutionWeekly[week] = { label: week, created: 0, validated: 0 };
+                sdEvolutionWeekly[week].created++;
+            }
+
+            if (month && new Date(month) >= historyLimit) {
+                if (!sdEvolutionMonthly[month]) sdEvolutionMonthly[month] = { label: month, created: 0, validated: 0 };
+                sdEvolutionMonthly[month].created++;
+            }
+
+            if (isValidated) {
+                const solveDate = row['Mis à jour'];
+                const solveWeek = getWeekStart(solveDate);
+                const solveMonth = getMonthStart(solveDate);
+                if (solveWeek && sdEvolutionWeekly[solveWeek]) sdEvolutionWeekly[solveWeek].validated++;
+                if (solveMonth && sdEvolutionMonthly[solveMonth]) sdEvolutionMonthly[solveMonth].validated++;
+            }
+        });
+
+        const sdEvolutionDataWeekly = Object.values(sdEvolutionWeekly).sort((a, b) => a.label.localeCompare(b.label));
+        const sdEvolutionDataMonthly = Object.values(sdEvolutionMonthly).sort((a, b) => a.label.localeCompare(b.label));
+
         // Distribution domaines
         const domainMap = {};
         all_except_rdd.forEach(row => {
@@ -554,6 +592,10 @@ app.get('/api/mantis/kpis', (req, res) => {
                 evolution: {
                     weekly: evolutionDataWeekly,
                     monthly: evolutionDataMonthly
+                },
+                sd_evolution: {
+                    weekly: sdEvolutionDataWeekly,
+                    monthly: sdEvolutionDataMonthly
                 },
                 domaines: domainDistribution,
                 backlog: {

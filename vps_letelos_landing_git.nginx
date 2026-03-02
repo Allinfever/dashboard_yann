@@ -1,0 +1,43 @@
+server {
+    listen 80;
+    server_name letelos.fr;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name letelos.fr;
+
+    # Point to the repo folder where GitHub Actions pushes
+    root /var/www/letelos-landing/repo;
+    index index.html;
+
+    ssl_certificate /etc/letsencrypt/live/letelos.fr/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/letelos.fr/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Purge old Service Worker/Cache from previous dashboard deployment
+    add_header Clear-Site-Data '"cache", "storage"' always;
+
+    # Security Headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Compression
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 256;
+
+    location = /favicon.svg {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

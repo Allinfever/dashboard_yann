@@ -309,6 +309,26 @@ const PilotagePage = () => {
                         </div>
                     </div>
 
+                    {/* SD Evolution Chart */}
+                    <div className={styles.chartCard}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h4 className={styles.chartTitle} style={{ marginBottom: 0 }}>Évolution des créations SD (12 mois)</h4>
+                        </div>
+                        <div className={styles.chartContainer}>
+                            <ResponsiveContainer>
+                                <LineChart data={global.sd_evolution[evolutionMode]}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="label" tick={{ fontSize: 10 }} tickFormatter={(val) => val.slice(5)} />
+                                    <YAxis tick={{ fontSize: 10 }} />
+                                    <Tooltip {...CHART_TOOLTIP_STYLE} />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="created" name="Créations SD" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                                    <Line type="monotone" dataKey="validated" name="Validées SD" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
                     {/* Domain Distribution */}
                     <div className={styles.chartCard} style={{ display: 'flex', flexDirection: 'column' }}>
                         <h4 className={styles.chartTitle}>Répartition par Domaine <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'none', fontWeight: 400 }}>(Hors RDD)</span></h4>

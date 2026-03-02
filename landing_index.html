@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Letelos — Projets</title>
+    <meta name="description"
+        content="Letelos — hub de projets web : Dashboard Travail & SaaS Engine. Déploiements robustes, CI/CD, HTTPS." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+        :root {
+            --bg0: #070A12;
+            --bg1: #0B1224;
+            --card: rgba(255, 255, 255, .06);
+            --card2: rgba(255, 255, 255, .09);
+            --stroke: rgba(255, 255, 255, .10);
+            --text: #EAF0FF;
+            --muted: rgba(234, 240, 255, .72);
+            --muted2: rgba(234, 240, 255, .55);
+            --accent: #7C5CFF;
+            --accent2: #35D0FF;
+            --good: #3DFFB5;
+            --warn: #FFCF5A;
+            --shadow: 0 20px 60px rgba(0, 0, 0, .55);
+            --r: 16px;
+            --r2: 22px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 20% -10%, rgba(124, 92, 255, .35), transparent 60%),
+                radial-gradient(900px 520px at 95% 10%, rgba(53, 208, 255, .22), transparent 55%),
+                radial-gradient(900px 620px at 55% 120%, rgba(61, 255, 181, .12), transparent 60%),
+                linear-gradient(180deg, var(--bg0), var(--bg1));
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 40px 18px 60px
+        }
+
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 16px;
+            border: 1px solid var(--stroke);
+            background: rgba(0, 0, 0, .18);
+            border-radius: 999px;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(124, 92, 255, 1), rgba(53, 208, 255, 1));
+            box-shadow: 0 10px 30px rgba(124, 92, 255, .25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo:before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .55), transparent 45%);
+            transform: rotate(20deg);
+        }
+
+        .brand strong {
+            letter-spacing: .4px
+        }
+
+        .pill {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 12px;
+            color: var(--muted);
+            padding: 8px 10px;
+            border: 1px solid var(--stroke);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 99px;
+            background: var(--good);
+            box-shadow: 0 0 18px rgba(61, 255, 181, .55)
+        }
+
+        .hero {
+            margin-top: 34px;
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 920px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            border: 1px solid var(--stroke);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+            border-radius: var(--r2);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel:after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: radial-gradient(700px 220px at 15% 10%, rgba(124, 92, 255, .18), transparent 60%),
+                radial-gradient(700px 220px at 85% 20%, rgba(53, 208, 255, .12), transparent 60%);
+            pointer-events: none;
+        }
+
+        .p {
+            position: relative;
+            padding: 28px 26px;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 46px;
+            line-height: 1.05;
+            letter-spacing: -.6px;
+        }
+
+        @media (max-width: 520px) {
+            h1 {
+                font-size: 38px
+            }
+        }
+
+        .lead {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.55;
+            max-width: 60ch
+        }
+
+        .cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            transition: transform .15s ease, background .15s ease, border-color .15s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, .07);
+            border-color: rgba(255, 255, 255, .16)
+        }
+
+        .btn.primary {
+            border-color: rgba(124, 92, 255, .55);
+            background: linear-gradient(135deg, rgba(124, 92, 255, .95), rgba(53, 208, 255, .35));
+            box-shadow: 0 16px 40px rgba(124, 92, 255, .22);
+        }
+
+        .btn .k {
+            font-size: 12px;
+            color: rgba(0, 0, 0, .75);
+            background: rgba(255, 255, 255, .75);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 920px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            border-radius: var(--r);
+            padding: 18px 18px 16px;
+            position: relative;
+            transition: transform .15s ease, border-color .15s ease, background .15s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .06)
+        }
+
+        .card:before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            pointer-events: none;
+            background: radial-gradient(500px 160px at 20% 0%, rgba(124, 92, 255, .18), transparent 55%),
+                radial-gradient(500px 160px at 80% 0%, rgba(53, 208, 255, .12), transparent 55%);
+            opacity: .65;
+        }
+
+        .card>* {
+            position: relative
+        }
+
+        .card h3 {
+            margin: 0 0 6px;
+            font-size: 18px
+        }
+
+        .meta {
+            color: var(--muted2);
+            font-size: 13px;
+            margin: 0 0 12px;
+            line-height: 1.4
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .badge {
+            font-size: 12px;
+            color: var(--muted);
+            border: 1px solid var(--stroke);
+            background: rgba(0, 0, 0, .18);
+            padding: 7px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge i {
+            width: 8px;
+            height: 8px;
+            border-radius: 99px;
+            background: var(--warn);
+            box-shadow: 0 0 18px rgba(255, 207, 90, .35);
+            display: inline-block
+        }
+
+        .badge.ok i {
+            background: var(--good);
+            box-shadow: 0 0 18px rgba(61, 255, 181, .4)
+        }
+
+        .side {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .mini {
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            border-radius: var(--r2);
+            padding: 18px;
+            box-shadow: 0 14px 44px rgba(0, 0, 0, .45);
+        }
+
+        .mini h2 {
+            margin: 0 0 10px;
+            font-size: 16px
+        }
+
+        .mini p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55
+        }
+
+        .links {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid var(--stroke);
+            background: rgba(0, 0, 0, .16);
+            transition: transform .15s ease, background .15s ease, border-color .15s ease;
+        }
+
+        .link:hover {
+            transform: translateY(-1px);
+            background: rgba(0, 0, 0, .22);
+            border-color: rgba(255, 255, 255, .16)
+        }
+
+        .link small {
+            color: var(--muted2)
+        }
+
+        .arrow {
+            opacity: .75
+        }
+
+        .section {
+            margin-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            padding-top: 18px;
+        }
+
+        footer {
+            margin-top: 34px;
+            color: var(--muted2);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 0 6px;
+        }
+
+        .sr {
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        :focus-visible {
+            outline: 2px solid rgba(53, 208, 255, .7);
+            outline-offset: 3px;
+            border-radius: 12px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="top" role="banner">
+            <div class="brand" aria-label="Letelos">
+                <div class="logo" aria-hidden="true"></div>
+                <strong>Letelos</strong>
+            </div>
+            <div class="pill" aria-label="Statut">
+                <span class="dot" aria-hidden="true"></span>
+                Production-ready • CI/CD • HTTPS • PM2
+            </div>
+        </header>
+
+        <main class="hero" role="main">
+            <section class="panel" aria-label="Présentation">
+                <div class="p">
+                    <h1>Hub de projets, déploiements robustes.</h1>
+                    <p class="lead">
+                        Letelos centralise des applications web livrées en continu. Accès sécurisé, isolation par
+                        sous-domaine,
+                        et infrastructure maintenable.
+                    </p>
+                    <div class="cta" role="navigation" aria-label="Accès rapide">
+                        <a class="btn primary" href="https://dashboard-travail.letelos.fr"
+                            aria-label="Ouvrir Dashboard Travail">
+                            Dashboard Travail <span class="k">LIVE</span>
+                        </a>
+                        <a class="btn" href="https://saasengine.letelos.fr" aria-label="Ouvrir SaaS Engine">
+                            SaaS Engine <span class="arrow" aria-hidden="true">→</span>
+                        </a>
+                    </div>
+
+                    <div class="grid section" aria-label="Projets">
+                        <a class="card" href="https://dashboard-travail.letelos.fr"
+                            aria-label="Accéder à Dashboard Travail">
+                            <h3>Dashboard Travail</h3>
+                            <p class="meta">Pilotage • Roadmap • Mantis • Exports</p>
+                            <ul>
+                                <li>Interface SPA rapide et stable</li>
+                                <li>API / Mantis synchronisée côté serveur</li>
+                                <li>Déploiement automatisé (GitHub Actions)</li>
+                            </ul>
+                            <div class="badges" aria-label="Badges">
+                                <span class="badge ok"><i aria-hidden="true"></i>Prod</span>
+                                <span class="badge ok"><i aria-hidden="true"></i>CI/CD</span>
+                                <span class="badge ok"><i aria-hidden="true"></i>HTTPS</span>
+                            </div>
+                        </a>
+
+                        <a class="card" href="https://saasengine.letelos.fr" aria-label="Accéder à SaaS Engine">
+                            <h3>SaaS Engine</h3>
+                            <p class="meta">Next.js 16 • App Router • Tailwind • Framer Motion</p>
+                            <ul>
+                                <li>Stack moderne orientée produit</li>
+                                <li>Déploiement isolé (PM2 + NGINX)</li>
+                                <li>Pipeline CI/CD prêt à l’emploi</li>
+                            </ul>
+                            <div class="badges" aria-label="Badges">
+                                <span class="badge ok"><i aria-hidden="true"></i>Live</span>
+                                <span class="badge ok"><i aria-hidden="true"></i>HTTPS</span>
+                                <span class="badge"><i aria-hidden="true"></i>Iterating</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="side" aria-label="Informations">
+                <div class="mini" aria-label="À propos">
+                    <h2>À propos</h2>
+                    <p>
+                        Objectif : livrer vite, proprement, et sans opérations manuelles.
+                        Architecture standardisée : 1 projet = 1 sous-domaine, logs, healthchecks, CI/CD.
+                    </p>
+                    <div class="badges" style="margin-top:12px">
+                        <span class="badge ok"><i aria-hidden="true"></i>NGINX</span>
+                        <span class="badge ok"><i aria-hidden="true"></i>Let’s Encrypt</span>
+                        <span class="badge ok"><i aria-hidden="true"></i>PM2</span>
+                        <span class="badge ok"><i aria-hidden="true"></i>GitHub Actions</span>
+                    </div>
+                </div>
+
+                <div class="mini" aria-label="Accès">
+                    <h2>Accès</h2>
+                    <p>Choisissez une application. Chaque projet est isolé et servi en HTTPS.</p>
+                    <div class="links" aria-label="Liens">
+                        <a class="link" href="https://dashboard-travail.letelos.fr"
+                            aria-label="Ouvrir Dashboard Travail">
+                            <div>
+                                <strong>Dashboard Travail</strong><br />
+                                <small>Production</small>
+                            </div>
+                            <span class="arrow" aria-hidden="true">→</span>
+                        </a>
+                        <a class="link" href="https://saasengine.letelos.fr" aria-label="Ouvrir SaaS Engine">
+                            <div>
+                                <strong>SaaS Engine</strong><br />
+                                <small>Next.js</small>
+                            </div>
+                            <span class="arrow" aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <footer role="contentinfo">
+            <span>© <span id="y"></span> Letelos</span>
+            <span>Hub multi-projets • Sous-domaines • CI/CD</span>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('y').textContent = new Date().getFullYear();
+    </script>
+</body>
+
+</html>
