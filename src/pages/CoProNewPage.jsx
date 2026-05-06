@@ -26,14 +26,25 @@ const ASSIGNED_REFERENTS_CANONICAL = new Set([
 
 const isAssignedReferent = (affecteRaw) => ASSIGNED_REFERENTS_CANONICAL.has(canonicalName(affecteRaw));
 
+const EXCLUDED_DOMAINS = new Set(['RDD', 'SAC']);
+
+const getPriorityP = (row) => (row['priorite_p'] || '').toString().trim().toUpperCase();
+
 const isP1OrP2 = (row) => {
-    const priority = (row['priorite_p'] || '').toString().trim().toUpperCase();
-    return priority.includes('P1') || priority.includes('P2');
+    const p = getPriorityP(row);
+    return p.includes('P1') || p.includes('P2');
 };
 
-const isNotRDD = (row) => {
+const isNotExcludedDomain = (row) => {
     const domaine = (row['Domaine (Toray)'] || '').trim();
-    return domaine !== 'RDD';
+    return !EXCLUDED_DOMAINS.has(domaine);
+};
+
+const getCategoryType = (row) => {
+    const cat = normalize(row['Catégorie']);
+    if (cat === 'projet') return 'projet';
+    if (cat.includes('toray') && cat.includes('ecart')) return 'evolution';
+    return null;
 };
 
 const isEncours = (row) => {
@@ -155,12 +166,33 @@ const CoProNewPage = () => {
         }
     };
 
-    const { encoursData, resoluesData } = useMemo(() => {
-        const baseFiltered = data.filter(row => isP1OrP2(row) && isNotRDD(row));
-        return {
-            encoursData: baseFiltered.filter(isEncours),
-            resoluesData: baseFiltered.filter(isResolue)
+    const { encoursData, resoluesData, summary } = useMemo(() => {
+        const baseFiltered = data.filter(row => isP1OrP2(row) && isNotExcludedDomain(row));
+        const enc = baseFiltered.filter(isEncours);
+        const res = baseFiltered.filter(isResolue);
+
+        const emptyCell = () => ({ total: 0, p1: 0, p2: 0 });
+        const buildBucket = () => ({ projet: emptyCell(), evolution: emptyCell(), total: emptyCell() });
+        const stats = { encours: buildBucket(), resolues: buildBucket() };
+
+        const tally = (bucket, row) => {
+            const p = getPriorityP(row);
+            const isP1 = p.includes('P1');
+            const isP2 = p.includes('P2');
+            bucket.total.total++;
+            if (isP1) bucket.total.p1++;
+            if (isP2) bucket.total.p2++;
+            const cat = getCategoryType(row);
+            if (cat) {
+                bucket[cat].total++;
+                if (isP1) bucket[cat].p1++;
+                if (isP2) bucket[cat].p2++;
+            }
         };
+        enc.forEach(r => tally(stats.encours, r));
+        res.forEach(r => tally(stats.resolues, r));
+
+        return { encoursData: enc, resoluesData: res, summary: stats };
     }, [data]);
 
     const columns = useMemo(() => {
@@ -219,7 +251,7 @@ const CoProNewPage = () => {
         });
     }, [data, mantisBaseUrl]);
 
-    const rulesText = "Mantis P1/P2 uniquement | RDD exclus | Référents : yann.deschamps, lucas.pouchoulin, anais.gines, hugo.rouch, mathilde.oger, charlotte.vanderroost, stephane.duprat";
+    const rulesText = "Mantis P1/P2 uniquement | Domaines RDD et SAC exclus | Référents : yann.deschamps, lucas.pouchoulin, anais.gines, hugo.rouch, mathilde.oger, charlotte.vanderroost, stephane.duprat";
 
     return (
         <div className="mantis-container">
@@ -245,6 +277,60 @@ const CoProNewPage = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Summary Recap Table */}
+            {data.length > 0 && (
+                <div className={styles.summaryWrapper}>
+                    <table className={styles.summaryTable}>
+                        <thead>
+                            <tr>
+                                <th className={styles.summaryFirstCol}>Mantis</th>
+                                <th>Projet</th>
+                                <th>Evolution</th>
+                                <th className={styles.summaryTotalCol}>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr className={styles.summaryRowEncours}>
+                                <td className={styles.summaryFirstCol}>Encours</td>
+                                <td className={styles.summaryValue}>{summary.encours.projet.total}</td>
+                                <td className={styles.summaryValue}>{summary.encours.evolution.total}</td>
+                                <td className={styles.summaryValue}>{summary.encours.total.total}</td>
+                            </tr>
+                            <tr className={styles.summaryRowEncoursSub}>
+                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P1</td>
+                                <td>{summary.encours.projet.p1}</td>
+                                <td>{summary.encours.evolution.p1}</td>
+                                <td>{summary.encours.total.p1}</td>
+                            </tr>
+                            <tr className={styles.summaryRowEncoursSub}>
+                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P2</td>
+                                <td>{summary.encours.projet.p2}</td>
+                                <td>{summary.encours.evolution.p2}</td>
+                                <td>{summary.encours.total.p2}</td>
+                            </tr>
+                            <tr className={styles.summaryRowResolues}>
+                                <td className={styles.summaryFirstCol}>Résolues</td>
+                                <td className={styles.summaryValue}>{summary.resolues.projet.total}</td>
+                                <td className={styles.summaryValue}>{summary.resolues.evolution.total}</td>
+                                <td className={styles.summaryValue}>{summary.resolues.total.total}</td>
+                            </tr>
+                            <tr className={styles.summaryRowResoluesSub}>
+                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P1</td>
+                                <td>{summary.resolues.projet.p1}</td>
+                                <td>{summary.resolues.evolution.p1}</td>
+                                <td>{summary.resolues.total.p1}</td>
+                            </tr>
+                            <tr className={styles.summaryRowResoluesSub}>
+                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P2</td>
+                                <td>{summary.resolues.projet.p2}</td>
+                                <td>{summary.resolues.evolution.p2}</td>
+                                <td>{summary.resolues.total.p2}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {error && (
                 <div style={{ border: '1px solid var(--color-rose)', background: 'rgba(244, 63, 94, 0.05)', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
@@ -284,7 +370,7 @@ const CoProNewPage = () => {
                         <span className={styles.count}>{encoursData.length}</span>
                     </h3>
                     <div className={styles.sectionRules}>
-                        État ∈ {'{Nouveau, Accepté, Chiffrage, Validation chiffrage, Réalisation}'} OU (État = Résolu ET Affecté à ∉ référents)
+                        P1/P2 hors RDD/SAC | État ∈ {'{Nouveau, Accepté, Chiffrage, Validation chiffrage, Réalisation}'} OU (État = Résolu ET Affecté à ∉ référents)
                     </div>
                 </div>
                 {encoursData.length > 0 ? (
@@ -313,7 +399,7 @@ const CoProNewPage = () => {
                         <span className={styles.count}>{resoluesData.length}</span>
                     </h3>
                     <div className={styles.sectionRules}>
-                        État = Résolu ET Affecté à ∈ référents
+                        P1/P2 hors RDD/SAC | État = Résolu ET Affecté à ∈ référents
                     </div>
                 </div>
                 {resoluesData.length > 0 ? (
