@@ -3,7 +3,18 @@ import DataTable from '../components/UI/DataTable';
 import styles from './CoProNewPage.module.css';
 import mantisStyles from './MantisPage.module.css';
 
-const ASSIGNED_USERS = [
+const ENCOURS_STATES = ['nouveau', 'accepté', 'chiffrage', 'validation chiffrage', 'réalisation'];
+
+const normalize = (val) => (val || '').toString().trim().toLowerCase();
+
+// Canonical form: strip accents + remove dots/spaces + lowercase.
+// Lets us match both login form ("yann.deschamps") and display name ("Yann Deschamps", "Stéphane Duprat").
+const canonicalName = (val) => normalize(val)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\s.]/g, '');
+
+const ASSIGNED_REFERENTS_CANONICAL = new Set([
     'yann.deschamps',
     'lucas.pouchoulin',
     'anais.gines',
@@ -11,11 +22,9 @@ const ASSIGNED_USERS = [
     'mathilde.oger',
     'charlotte.vanderroost',
     'stephane.duprat'
-];
+].map(canonicalName));
 
-const ENCOURS_STATES = ['nouveau', 'accepté', 'chiffrage', 'validation chiffrage', 'réalisation'];
-
-const normalize = (val) => (val || '').toString().trim().toLowerCase();
+const isAssignedReferent = (affecteRaw) => ASSIGNED_REFERENTS_CANONICAL.has(canonicalName(affecteRaw));
 
 const isP1OrP2 = (row) => {
     const priority = (row['priorite_p'] || '').toString().trim().toUpperCase();
@@ -29,17 +38,14 @@ const isNotRDD = (row) => {
 
 const isEncours = (row) => {
     const etat = normalize(row['État'] || row['Etat']);
-    const affecte = normalize(row['Affecté à']);
-
     if (ENCOURS_STATES.includes(etat)) return true;
-    if (etat === 'résolu' && !ASSIGNED_USERS.includes(affecte)) return true;
+    if (etat === 'résolu' && !isAssignedReferent(row['Affecté à'])) return true;
     return false;
 };
 
 const isResolue = (row) => {
     const etat = normalize(row['État'] || row['Etat']);
-    const affecte = normalize(row['Affecté à']);
-    return etat === 'résolu' && ASSIGNED_USERS.includes(affecte);
+    return etat === 'résolu' && isAssignedReferent(row['Affecté à']);
 };
 
 const CoProNewPage = () => {
