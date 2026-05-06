@@ -1,0 +1,73 @@
+.section {
+    margin-bottom: 3rem;
+}
+
+.sectionHeader {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sectionTitle {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.35rem;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.dotEncours {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-amber);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    display: inline-block;
+}
+
+.dotResolues {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-emerald, #10b981);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    display: inline-block;
+}
+
+.count {
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-weight: 700;
+}
+
+.sectionRules {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-dim);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.rulesFooter {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
+}

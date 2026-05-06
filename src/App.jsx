@@ -8,6 +8,7 @@ import OpenTopicsPage from './pages/OpenTopicsPage';
 import OpenTopicDetailPage from './pages/OpenTopicDetailPage';
 import DocumentationPage from './pages/DocumentationPage';
 import MantisExtractorPage from './pages/MantisExtractorPage';
+import CoProNewPage from './pages/CoProNewPage';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/open-topics/:id" element={<OpenTopicDetailPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
           <Route path="/mantis-extractor" element={<MantisExtractorPage />} />
+          <Route path="/copro-new" element={<CoProNewPage />} />
         </Routes>
       </MainLayout>
     </Router>

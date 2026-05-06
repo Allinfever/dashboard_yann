@@ -30,6 +30,13 @@ export const navConfig = [
     ]
   },
   {
+    id: 'copro-new',
+    path: '/copro-new',
+    label: 'CoPro New',
+    icon: '🆕',
+    tabs: []
+  },
+  {
     id: 'sujets-ouverts',
     path: '/open-topics',
     label: 'Sujets Ouverts',
