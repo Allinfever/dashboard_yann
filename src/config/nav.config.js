@@ -60,6 +60,13 @@ export const navConfig = [
     label: 'Mantis & Notes Extractor',
     icon: '📥',
     tabs: []
+  },
+  {
+    id: 'impot',
+    path: '/impot',
+    label: 'Impôt',
+    icon: '💰',
+    tabs: []
   }
 ];
 
