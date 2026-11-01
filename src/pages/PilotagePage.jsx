@@ -11,6 +11,7 @@ import {
 import { Clock, CheckCircle, AlertCircle, TrendingUp, Inbox } from 'lucide-react';
 import { DEFAULT_DEADLINES } from '../config/roadmapConfig';
 import styles from './PilotagePage.module.css';
+import { formatSyncDate } from '../utils/mantisDisplay';
 
 const DEADLINES_STORAGE_KEY = 'pilotage_deadlines_v2';
 
@@ -191,7 +192,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     {kpis.last_sync && (
                         <span className={styles.lastSync}>
-                            Dernière synchro : {new Date(kpis.last_sync).toLocaleString()}
+                            Dernière synchro : {formatSyncDate(kpis.last_sync)}
                         </span>
                     )}
                     <button onClick={fetchKPIs} className={styles.resetBtn} style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}>

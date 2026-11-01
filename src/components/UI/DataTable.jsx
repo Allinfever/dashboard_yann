@@ -29,11 +29,19 @@ const COLUMN_BLACKLIST = [
     'Type de développement',
     'Visibilité',
     'Reproductibilité',
-    'Projet'
+    'Projet',
+    // Standard Mantis priority (normale, basse...), not to be confused with "Priorité (P)"
+    'Priorité'
 ];
 
 // --- Helper: accent and case insensitive text ---
 const normalizeText = (val) => (val ?? '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// --- Helper: "2026-10-30" -> "30/10/2026" (other values unchanged) ---
+const formatDateFr = (val) => {
+    const match = typeof val === 'string' && val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : val;
+};
 
 // --- Helper: every searched word must appear somewhere in the row ---
 // IDs are also searchable without their leading zeros ("17259" finds "0017259")
@@ -41,14 +49,22 @@ const matchesSearch = (row, words) => {
     const text = Object.values(row)
         .map(v => {
             const s = normalizeText(v);
-            return /^0+\d+$/.test(s) ? `${s} ${s.replace(/^0+/, '')}` : s;
+            if (/^0+\d+$/.test(s)) return `${s} ${s.replace(/^0+/, '')}`;
+            const fr = formatDateFr(s);
+            return fr !== s ? `${s} ${fr}` : s;
         })
         .join(' | ');
     return words.every(word => text.includes(word));
 };
 
-const columnFilterFn = (row, columnId, value) =>
-    normalizeText(row.getValue(columnId)).includes(normalizeText(value).trim());
+// Dates match both their stored ("2026-10-30") and displayed ("30/10/2026") forms
+const columnFilterFn = (row, columnId, value) => {
+    const raw = row.getValue(columnId);
+    const needle = normalizeText(value).trim();
+    return normalizeText(raw).includes(needle) || normalizeText(formatDateFr(raw)).includes(needle);
+};
+
+const defaultCell = ({ getValue }) => formatDateFr(getValue());
 
 // --- Helper: Check if column is empty across all rows ---
 const isColumnEmpty = (rows, key) => {
@@ -186,7 +202,7 @@ const DataTable = ({
     const table = useReactTable({
         data: searchedData,
         columns,
-        defaultColumn: { filterFn: columnFilterFn },
+        defaultColumn: { filterFn: columnFilterFn, cell: defaultCell },
         state: {
             sorting,
             columnFilters,

@@ -6,6 +6,7 @@ import MantisFilters from '../components/Mantis/MantisFilters';
 import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
+import { formatSyncDate, loadErrorMessage, refreshErrorMessage, jobErrorMessage } from '../utils/mantisDisplay';
 
 const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
     const [searchParams] = useSearchParams();
@@ -16,7 +17,6 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [lastUpdate, setLastUpdate] = useState(null);
-    const [isCached, setIsCached] = useState(false);
     const [warning, setWarning] = useState(null);
     const [jobStatus, setJobStatus] = useState(null);
 
@@ -44,14 +44,13 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
             if (!response.ok) {
                 setDiag({ status, body: text.slice(0, 300) });
-                throw new Error(`Erreur serveur (${status})`);
+                throw new Error(loadErrorMessage(status));
             }
 
             const result = JSON.parse(text);
             setData(result.issues || []);
             setMantisBaseUrl(result.baseUrl || '');
             setLastUpdate(result.lastUpdate);
-            setIsCached(!!result.isFromCache);
             if (result.warning) setWarning(result.warning);
         } catch (err) {
             setError(err.message);
@@ -72,7 +71,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
             if (!startRes.ok) {
                 const text = await startRes.text();
                 setDiag({ status: startRes.status, body: text.slice(0, 300) });
-                throw new Error(`Échec du démarrage du refresh (${startRes.status})`);
+                throw new Error(refreshErrorMessage(startRes.status));
             }
             const { jobId } = await startRes.json();
 
@@ -89,7 +88,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                         fetchData();
                     } else if (status.status === 'failed') {
                         clearInterval(poll);
-                        setError(status.error || 'Job échoué');
+                        setError(jobErrorMessage(status.error));
                         setJobStatus(null);
                         setLoading(false);
                     }
@@ -181,8 +180,8 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                         if (val === undefined || val === '') {
                             return (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ color: 'var(--text-dim)', fontStyle: 'italic', fontSize: '0.75rem' }}>Non enrichi</span>
-                                    <button onClick={() => enrichSingleRow(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-cyan)' }} title="Enrichir">↻</button>
+                                    <span style={{ color: 'var(--text-dim)', fontStyle: 'italic', fontSize: '0.75rem' }}>Non renseignée</span>
+                                    <button onClick={() => enrichSingleRow(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-cyan)' }} title="Relire la priorité dans Mantis">↻</button>
                                 </div>
                             );
                         }
@@ -206,17 +205,12 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
             <div className={styles.pageHeader}>
                 <div>
                     <h2>{title} - {currentTabConfig.label}</h2>
-                    {/* DIAGNOSTIC BAR */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
-                        <span style={{ color: isCached ? 'var(--color-amber)' : 'var(--color-emerald)' }}>
-                            ● Source: {isCached ? 'Cache' : 'Fresh'}
+                        <span>
+                            {displayedData.length} ticket{displayedData.length > 1 ? 's' : ''} affiché{displayedData.length > 1 ? 's' : ''} sur {data.length}
                         </span>
-                        <span title="Lignes affichées / Lignes de l'onglet / Total en cache">
-                            ● Nb lignes: {displayedData.length} / {filteredData.length} / {data.length}
-                        </span>
-
                         {lastUpdate && (
-                            <span>● Last sync: {new Date(lastUpdate).toLocaleString()}</span>
+                            <span>● Mis à jour le {formatSyncDate(lastUpdate)}</span>
                         )}
                     </div>
                 </div>
@@ -230,14 +224,14 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
             {error && (
                 <div className={styles.error} style={{ border: '1px solid var(--color-rose)', background: 'rgba(244, 63, 94, 0.05)', padding: '1.5rem', borderRadius: '12px' }}>
-                    <div style={{ fontWeight: 800, color: 'var(--color-rose)', marginBottom: '0.5rem' }}>CRITICAL: {error}</div>
-                    {diag.status && (
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            HTTP Status: <strong>{diag.status}</strong>
+                    <div style={{ fontWeight: 700, color: 'var(--color-rose)' }}>⚠️ {error}</div>
+                    {diag.body && (
+                        <details style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            <summary style={{ cursor: 'pointer' }}>Détails techniques</summary>
                             <pre style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', overflow: 'auto', maxHeight: '150px', whiteSpace: 'pre-wrap' }}>
-                                {diag.body}
+                                Code {diag.status} : {diag.body}
                             </pre>
-                        </div>
+                        </details>
                     )}
                 </div>
             )}
@@ -247,7 +241,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
             {jobStatus && (
                 <div className={styles.progressContainer}>
                     <div className={styles.progressHeader}>
-                        <span className={styles.progressTitle}>Actualisation du cache Mantis</span>
+                        <span className={styles.progressTitle}>Synchronisation avec Mantis</span>
                         <span className={styles.progressPercent}>{Math.round(jobStatus.progress || 0)}%</span>
                     </div>
                     <div className={styles.progressBarTrack}>
@@ -255,7 +249,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                     </div>
                     {jobStatus.step && <div className={styles.progressStep}>{jobStatus.step}</div>}
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.5rem' }}>
-                        ID: {jobStatus.startTime} | En cours: {jobStatus.current}/{jobStatus.total}
+                        {jobStatus.current} / {jobStatus.total} tickets traités
                     </div>
                 </div>
             )}
