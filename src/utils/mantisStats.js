@@ -4,13 +4,14 @@ const OPEN_STATES = ['nouveau', 'accepté', 'chiffrage', 'validation chiffrage',
 const CLOSED_STATES = ['validé', 'fermé', 'annulé'];
 const DAY = 24 * 60 * 60 * 1000;
 
-export const PRIORITY_KEYS = ['P1', 'P2', 'Non renseignée'];
+export const PRIORITY_KEYS = ['P1', 'P2', 'P3', 'Non renseignée'];
 
 const state = (row) => (row['État'] || row['Etat'] || '').trim().toLowerCase();
 const priorityKey = (row) => {
     const p = (row['priorite_p'] || '').toUpperCase();
     if (p.includes('P1')) return 'P1';
     if (p.includes('P2')) return 'P2';
+    if (p.includes('P3')) return 'P3';
     return 'Non renseignée';
 };
 const toDate = (value) => {

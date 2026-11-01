@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
     ResponsiveContainer, LineChart, Line, BarChart, Bar,
     XAxis, YAxis, CartesianGrid, Tooltip
@@ -6,7 +6,7 @@ import {
 import { computeMantisStats, PRIORITY_KEYS } from '../../utils/mantisStats';
 import styles from './MantisStats.module.css';
 
-const PRIORITY_COLORS = { P1: '#e34948', P2: '#eda100', 'Non renseignée': '#64748b' };
+const PRIORITY_COLORS = { P1: '#e34948', P2: '#eda100', P3: '#3b82f6', 'Non renseignée': '#64748b' };
 const FLOW_COLORS = { created: '#3b82f6', closed: '#10b981' };
 const AXIS = { stroke: '#64748b', fontSize: 11, tickLine: false, axisLine: false };
 const GRID = { stroke: 'rgba(255,255,255,0.06)', vertical: false };
@@ -28,9 +28,7 @@ const Legend = ({ items }) => (
     </div>
 );
 
-const PRIORITY_LEGEND = PRIORITY_KEYS.map(k => [k, PRIORITY_COLORS[k]]);
-
-const StackedPriorityBars = ({ data, layout = 'horizontal', height }) => (
+const StackedPriorityBars = ({ data, keys, layout = 'horizontal', height }) => (
     <div style={{ height }}>
         <ResponsiveContainer>
             <BarChart data={data} layout={layout === 'vertical' ? 'vertical' : 'horizontal'} margin={{ left: 0, right: 8 }}>
@@ -47,9 +45,9 @@ const StackedPriorityBars = ({ data, layout = 'horizontal', height }) => (
                     </>
                 )}
                 <Tooltip {...TOOLTIP} />
-                {PRIORITY_KEYS.map((k, i) => (
+                {keys.map((k, i) => (
                     <Bar key={k} dataKey={k} stackId="p" fill={PRIORITY_COLORS[k]} maxBarSize={layout === 'vertical' ? 18 : 40}
-                        radius={i === PRIORITY_KEYS.length - 1 ? (layout === 'vertical' ? [0, 3, 3, 0] : [3, 3, 0, 0]) : 0} />
+                        radius={i === keys.length - 1 ? (layout === 'vertical' ? [0, 3, 3, 0] : [3, 3, 0, 0]) : 0} />
                 ))}
             </BarChart>
         </ResponsiveContainer>
@@ -62,18 +60,65 @@ const heatColor = (value, max) => {
     return `rgba(59, 130, 246, ${alpha.toFixed(2)})`;
 };
 
-const MantisStats = ({ data }) => {
-    const stats = useMemo(() => computeMantisStats(data), [data]);
-    const { kpis } = stats;
+const isP3 = (row) => (row['priorite_p'] || '').toUpperCase().includes('P3');
 
-    if (data.length === 0) {
-        return <div className={styles.empty}>Aucun ticket ne correspond aux filtres sélectionnés.</div>;
+const readExcludeP3 = (storageKey) => {
+    try {
+        return localStorage.getItem(storageKey) === 'true';
+    } catch {
+        return false;
+    }
+};
+
+const MantisStats = ({ data, source = 'recette' }) => {
+    const storageKey = `mantis_stats_exclude_p3_${source}`;
+    const [excludeP3, setExcludeP3] = useState(() => readExcludeP3(storageKey));
+    useEffect(() => {
+        try {
+            localStorage.setItem(storageKey, String(excludeP3));
+        } catch {
+            // Storage unavailable: the choice simply isn't remembered
+        }
+    }, [excludeP3, storageKey]);
+
+    const rows = useMemo(() => (excludeP3 ? data.filter(row => !isP3(row)) : data), [data, excludeP3]);
+    const stats = useMemo(() => computeMantisStats(rows), [rows]);
+    const { kpis } = stats;
+    const keys = excludeP3 ? PRIORITY_KEYS.filter(k => k !== 'P3') : PRIORITY_KEYS;
+    const priorityLegend = keys.map(k => [k, PRIORITY_COLORS[k]]);
+
+    const toolbar = (
+        <div className={styles.toolbar}>
+            <span className={styles.scope}>
+                {excludeP3 ? 'Hors P3' : 'Toutes priorités'} · {rows.length} ticket{rows.length > 1 ? 's' : ''}
+            </span>
+            <button
+                type="button"
+                role="switch"
+                aria-checked={excludeP3}
+                className={styles.switch}
+                onClick={() => setExcludeP3(v => !v)}
+            >
+                <span className={styles.switchTrack}><span className={styles.switchThumb} /></span>
+                Hors P3
+            </button>
+        </div>
+    );
+
+    if (rows.length === 0) {
+        return (
+            <div className={styles.stats}>
+                {toolbar}
+                <div className={styles.empty}>Aucun ticket ne correspond aux filtres sélectionnés.</div>
+            </div>
+        );
     }
 
-    const heatMax = Math.max(1, ...stats.domains.flatMap(d => PRIORITY_KEYS.map(k => d[k])));
+    const heatMax = Math.max(1, ...stats.domains.flatMap(d => keys.map(k => d[k])));
 
     return (
         <div className={styles.stats}>
+            {toolbar}
             <div className={styles.kpis}>
                 <div className={styles.kpi}>
                     <span className={styles.kpiLabel}>Tickets ouverts</span>
@@ -122,21 +167,21 @@ const MantisStats = ({ data }) => {
             <div className={styles.grid}>
                 <section className={styles.card}>
                     <h4 className={styles.cardTitle}>Ancienneté des tickets ouverts</h4>
-                    <Legend items={PRIORITY_LEGEND} />
-                    <StackedPriorityBars data={stats.ageBuckets} height={220} />
+                    <Legend items={priorityLegend} />
+                    <StackedPriorityBars data={stats.ageBuckets} keys={keys} height={220} />
                 </section>
 
                 <section className={styles.card}>
                     <h4 className={styles.cardTitle}>Domaines × priorité (ouverts)</h4>
                     <table className={styles.heatmap}>
                         <thead>
-                            <tr><th />{PRIORITY_KEYS.map(k => <th key={k}>{k === 'Non renseignée' ? 'Non rens.' : k}</th>)}<th>Total</th></tr>
+                            <tr><th />{keys.map(k => <th key={k}>{k === 'Non renseignée' ? 'Non rens.' : k}</th>)}<th>Total</th></tr>
                         </thead>
                         <tbody>
                             {stats.domains.map(d => (
                                 <tr key={d.name}>
                                     <td className={styles.heatLabel}>{d.name}</td>
-                                    {PRIORITY_KEYS.map(k => (
+                                    {keys.map(k => (
                                         <td key={k} style={{ background: heatColor(d[k], heatMax) }} className={d[k] ? '' : styles.heatZero}>
                                             {d[k] || '·'}
                                         </td>
@@ -168,13 +213,13 @@ const MantisStats = ({ data }) => {
 
                 <section className={styles.card}>
                     <h4 className={styles.cardTitle}>Ouverts par personne (top 8)</h4>
-                    <Legend items={PRIORITY_LEGEND} />
-                    <StackedPriorityBars data={stats.assignees} layout="vertical" height={Math.max(120, stats.assignees.length * 34 + 30)} />
+                    <Legend items={priorityLegend} />
+                    <StackedPriorityBars data={stats.assignees} keys={keys} layout="vertical" height={Math.max(120, stats.assignees.length * 34 + 30)} />
                 </section>
             </div>
 
             <p className={styles.note}>
-                Hors P3. Les tickets « Résolu » comptent comme ouverts (en attente de validation).
+                {excludeP3 ? 'Hors P3. ' : ''}Les tickets « Résolu » comptent comme ouverts (en attente de validation).
                 La date de clôture est approchée par la date « Mis à jour » des tickets Validés, Fermés ou Annulés.
             </p>
         </div>

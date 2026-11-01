@@ -267,7 +267,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
             {currentTab === 'synthese-copro' ? (
                 <CoproSummary data={data} loading={loading} />
             ) : currentTab === 'statistiques' ? (
-                data.length > 0 && <MantisStats data={displayedData} />
+                data.length > 0 && <MantisStats data={displayedData} source={source} />
             ) : displayedData.length > 0 ? (
                 <div>
                     <DataTable data={displayedData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />

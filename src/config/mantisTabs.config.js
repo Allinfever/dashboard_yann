@@ -114,8 +114,8 @@ export const mantisTabsConfig = [
     {
         tabId: 'statistiques',
         label: 'Statistiques',
-        filterFn: (row) => !(row['priorite_p'] || '').toUpperCase().includes('P3'),
-        rulesText: 'Hors P3'
+        filterFn: () => true,
+        rulesText: ''
     },
     {
         tabId: 'all-mantis',

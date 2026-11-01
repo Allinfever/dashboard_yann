@@ -4,6 +4,66 @@
     gap: 1.25rem;
 }
 
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.scope {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.switch[aria-checked='true'] {
+    color: #fff;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.switchTrack {
+    position: relative;
+    width: 28px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    transition: background 0.15s;
+}
+
+.switch[aria-checked='true'] .switchTrack {
+    background: var(--color-primary);
+}
+
+.switchThumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.15s;
+}
+
+.switch[aria-checked='true'] .switchThumb {
+    transform: translateX(12px);
+}
+
 .kpis {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
