@@ -20,7 +20,7 @@ function App() {
           <Route path="/pilotage" element={<PilotagePage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/mantis" element={<MantisPage />} />
-          <Route path="/mantis-demarrage" element={<MantisPage key="demarrage" source="demarrage" title="Mantis Démarrage" />} />
+          <Route path="/mantis-demarrage" element={<MantisPage key="demarrage" source="demarrage" title="Mantis Démarrage" deriveDomainFromSummary />} />
           <Route path="/open-topics" element={<OpenTopicsPage />} />
           <Route path="/open-topics/:id" element={<OpenTopicDetailPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />

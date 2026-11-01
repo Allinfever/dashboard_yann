@@ -20,6 +20,13 @@ const isInCurrentWeek = (dateString) => {
     return date >= monday && date <= sunday;
 };
 
+// Matches both the login ("yann.deschamps") and the display name ("Yann Deschamps")
+const isYann = (assignee) => (assignee || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s.]/g, '') === 'yanndeschamps';
+
 export const mantisTabsConfig = [
 
     {
@@ -50,8 +57,7 @@ export const mantisTabsConfig = [
             const isCorrectStatus = validStatuses.includes(status);
 
             // Affecté à != "yann.deschamps"
-            const assignee = (row['Affecté à'] || '').trim().toLowerCase();
-            const isNotYann = assignee !== 'yann.deschamps';
+            const isNotYann = !isYann(row['Affecté à']);
 
             return isSD && isCorrectStatus && isNotYann;
         },
@@ -71,10 +77,7 @@ export const mantisTabsConfig = [
             const isResolut = status === 'résolu';
 
             // Affecté à = "yann.deschamps"
-            const assignee = (row['Affecté à'] || '').trim().toLowerCase();
-            const isYann = assignee === 'yann.deschamps';
-
-            return isSD && isResolut && isYann;
+            return isSD && isResolut && isYann(row['Affecté à']);
         },
         rulesText: 'Catégorie = SD | État = Résolu | Affecté à = yann.deschamps'
     },
