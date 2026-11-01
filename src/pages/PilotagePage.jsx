@@ -67,7 +67,7 @@ const buildDonutGradient = (kpis) => {
     return `conic-gradient(${segments.join(', ')})`;
 };
 
-const PilotagePage = () => {
+const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/mantis', showDeadlines = true }) => {
     const navigate = useNavigate();
     const [kpis, setKpis] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -85,7 +85,7 @@ const PilotagePage = () => {
     const fetchKPIs = async () => {
         try {
             setLoading(true);
-            const res = await fetch('/api/mantis/kpis');
+            const res = await fetch(`/api/mantis/kpis?source=${source}`);
             const result = await res.json();
             if (res.ok) {
                 setKpis(result);
@@ -134,26 +134,26 @@ const PilotagePage = () => {
             <div className={styles.donutCard}>
                 <h4 className={styles.donutTitle}>{title}</h4>
                 <div className={styles.donutWrapper}>
-                    <div className={styles.donut} style={{ background: gradient }} onClick={() => navigate(`/mantis?tab=${tabId}`)}>
+                    <div className={styles.donut} style={{ background: gradient }} onClick={() => navigate(`${mantisPath}?tab=${tabId}`)}>
                         <div className={styles.donutCenter}>
                             <span className={styles.donutTotal}>{data.total}</span>
                             <span className={styles.donutLabel}>Total</span>
                         </div>
                     </div>
                     <div className={styles.legend}>
-                        <div className={styles.legendItem} onClick={() => navigate(`/mantis?tab=${tabId}`)}>
+                        <div className={styles.legendItem} onClick={() => navigate(`${mantisPath}?tab=${tabId}`)}>
                             <span className={styles.legendDot} style={{ backgroundColor: PRIORITY_COLORS.p1 }}></span>
                             <span className={styles.legendText}>P1: {data.p1}</span>
                         </div>
-                        <div className={styles.legendItem} onClick={() => navigate(`/mantis?tab=${tabId}`)}>
+                        <div className={styles.legendItem} onClick={() => navigate(`${mantisPath}?tab=${tabId}`)}>
                             <span className={styles.legendDot} style={{ backgroundColor: PRIORITY_COLORS.p2 }}></span>
                             <span className={styles.legendText}>P2: {data.p2}</span>
                         </div>
-                        <div className={styles.legendItem} onClick={() => navigate(`/mantis?tab=${tabId}`)}>
+                        <div className={styles.legendItem} onClick={() => navigate(`${mantisPath}?tab=${tabId}`)}>
                             <span className={styles.legendDot} style={{ backgroundColor: PRIORITY_COLORS.p3 }}></span>
                             <span className={styles.legendText}>P3: {data.p3}</span>
                         </div>
-                        <div className={styles.legendItem} onClick={() => navigate(`/mantis?tab=${tabId}`)}>
+                        <div className={styles.legendItem} onClick={() => navigate(`${mantisPath}?tab=${tabId}`)}>
                             <span className={styles.legendDot} style={{ backgroundColor: PRIORITY_COLORS.nonPrio }}></span>
                             <span className={styles.legendText}>Non prio: {data.non_prio}</span>
                         </div>
@@ -171,7 +171,7 @@ const PilotagePage = () => {
                 <div className={styles.error} style={{ textAlign: 'center', padding: '3rem' }}>
                     <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{error}</p>
                     {errorCode === 'CACHE_MISSING' ? (
-                        <button onClick={() => navigate('/mantis?tab=all-mantis')} className={styles.primaryBtn}>Lancer une synchronisation Mantis</button>
+                        <button onClick={() => navigate(`${mantisPath}?tab=all-mantis`)} className={styles.primaryBtn}>Lancer une synchronisation Mantis</button>
                     ) : (
                         <button onClick={() => window.location.reload()} className={styles.secondaryBtn}>Réessayer</button>
                     )}
@@ -187,7 +187,7 @@ const PilotagePage = () => {
     return (
         <div className="card">
             <div className={styles.pageHeader}>
-                <h2 className={styles.pageTitle}>Pilotage</h2>
+                <h2 className={styles.pageTitle}>{title}</h2>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     {kpis.last_sync && (
                         <span className={styles.lastSync}>
@@ -201,7 +201,7 @@ const PilotagePage = () => {
             </div>
 
             {/* Section 1: Deadlines */}
-            <section className={styles.deadlinesSection}>
+            {showDeadlines && <section className={styles.deadlinesSection}>
                 <div className={styles.sectionHeader}>
                     <h3 className={styles.sectionTitle}>📅 Deadlines</h3>
                     <button onClick={resetDeadlines} className={styles.resetBtn}>Réinitialiser</button>
@@ -226,7 +226,7 @@ const PilotagePage = () => {
                         );
                     })}
                 </div>
-            </section>
+            </section>}
 
             {/* Section 2: KPI SD (Existing) */}
             <section className={styles.kpiSection}>

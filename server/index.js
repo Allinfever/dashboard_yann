@@ -59,6 +59,8 @@ const MANTIS_SOURCES = {
     demarrage: {
         // No saved filter: the whole project is exported, looked up by name
         projectName: 'TORAY - Démarrage',
+        // The project has no "Domaine (Toray)" field: the domain is the summary prefix ("SD - ...")
+        deriveDomainFromSummary: true,
         cacheFile: path.join(DATA_DIR, 'mantis_demarrage.json')
     }
 };
@@ -315,12 +317,23 @@ async function performProjectExport(mantis, projectName) {
     return res.data;
 }
 
+const domainFromSummary = (summary) => {
+    const match = (summary || '').match(/^\s*([A-Za-z]{2,4})\s*-/);
+    return match ? match[1].toUpperCase() : '';
+};
+
 // Helper for cache
 const readCache = (source = 'recette') => {
-    const cacheFile = MANTIS_SOURCES[source].cacheFile;
+    const { cacheFile, deriveDomainFromSummary } = MANTIS_SOURCES[source];
     if (fs.existsSync(cacheFile)) {
         try {
-            return JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+            const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+            if (deriveDomainFromSummary && Array.isArray(cache.data)) {
+                cache.data.forEach(row => {
+                    if (!row['Domaine (Toray)']) row['Domaine (Toray)'] = domainFromSummary(row['Résumé']);
+                });
+            }
+            return cache;
         } catch (e) {
             return null;
         }
@@ -426,8 +439,10 @@ app.get('/api/mantis/health', (req, res) => {
 
 app.get('/api/mantis/kpis', (req, res) => {
     const rid = `kpi-${Date.now()}`;
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source' });
     try {
-        const cache = readCache();
+        const cache = readCache(source);
         if (!cache || !cache.data) {
             logger.error(rid, '/api/mantis/kpis', 503, 'Cache not available');
             return res.status(503).json({ error: 'Cache Mantis non disponible. Veuillez lancer une synchronisation.', code: 'CACHE_MISSING' });
@@ -482,15 +497,17 @@ app.get('/api/mantis/kpis', (req, res) => {
             return { total, p1, p2, p3, non_prio };
         };
 
+        // Matches both the login ("yann.deschamps") and the display name ("Yann Deschamps")
+        const isYannAssignee = (row) => (row['Affecté à'] || '').toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s.]/g, '') === 'yanndeschamps';
+
         // SD En cours logic (KPI Rules)
         const sd_en_cours_items = data.filter(row => {
             const category = (row['Catégorie'] || '').trim();
             const domaine = (row['Domaine (Toray)'] || '').trim();
             const isSD = category === 'SD' || domaine === 'SD';
             const isCorrectStatus = isKpiOpen(row);
-            const assignee = (row['Affecté à'] || '').trim().toLowerCase();
-            const isNotYann = assignee !== 'yann.deschamps';
-            return isSD && isCorrectStatus && isNotYann;
+            return isSD && isCorrectStatus && !isYannAssignee(row);
         });
 
         // SD Testable logic (Remains specific to "Résolu" for operational value, but within KPI Open scope)
@@ -500,9 +517,7 @@ app.get('/api/mantis/kpis', (req, res) => {
             const isSD = category === 'SD' || domaine === 'SD';
             const status = (row['État'] || row['Etat'] || '').trim().toLowerCase();
             const isResolu = status === 'résolu';
-            const assignee = (row['Affecté à'] || '').trim().toLowerCase();
-            const isYann = assignee === 'yann.deschamps';
-            return isSD && isResolu && isYann;
+            return isSD && isResolu && isYannAssignee(row);
         });
 
         // --- GLOBAL KPIS (All except RDD) ---
@@ -848,22 +863,18 @@ app.get('/api/mantis/status/:id', (req, res) => {
 });
 
 
-app.post('/api/mantis/refresh', async (req, res) => {
-    const source = getSource(req);
-    if (!source) return res.status(400).json({ error: 'Unknown source' });
+// Starts a background refresh of a source: returns { jobId } or { status, error }
+const startRefresh = (source) => {
     const { queryId, projectName } = MANTIS_SOURCES[source];
     if (refreshJobs[source].isRunning) {
-        return res.status(409).json({ error: 'Refresh already in progress' });
+        return { status: 409, error: 'Refresh already in progress' };
+    }
+    if (!process.env.MANTIS_BASE_URL || !process.env.MANTIS_USERNAME || !process.env.MANTIS_PASSWORD) {
+        return { status: 500, error: 'Missing configuration' };
     }
 
     const rid = `job-${Date.now()}`;
     const mantis = new MantisClient(rid);
-
-    if (!process.env.MANTIS_BASE_URL || !process.env.MANTIS_USERNAME || !process.env.MANTIS_PASSWORD) {
-        return res.status(500).json({ error: 'Missing configuration' });
-    }
-
-    res.json({ message: 'Refresh started', jobId: rid });
 
     (async () => {
         const startTime = Date.now();
@@ -910,10 +921,24 @@ app.post('/api/mantis/refresh', async (req, res) => {
             };
             let reused = 0;
 
+            // When the Mantis CSV export includes the P priority custom field, no ticket page is opened
+            const csvPriorityColumn = Object.keys(rows[0] || {}).find(col => {
+                const values = rows.map(row => (row[col] || '').trim()).filter(Boolean);
+                return col !== 'priorite_p' && values.length > 0 && values.every(v => /^P[1-9]\b/.test(v));
+            });
+            if (csvPriorityColumn) console.log(`[Job:${source}] P priority read from CSV column "${csvPriorityColumn}"`);
+
             const enrichRow = async (row) => {
                 const idAttr = row['Identifiant'] || row['id'];
-                const known = reusablePriority(row);
-                if (known !== undefined) {
+                const known = csvPriorityColumn
+                    ? ((row[csvPriorityColumn] || '').trim().match(/^P[1-9]/) || [''])[0]
+                    : reusablePriority(row);
+                if (csvPriorityColumn) {
+                    row['priorite_p'] = known;
+                    delete row[csvPriorityColumn];
+                    if (known) refreshJob.success++;
+                    else refreshJob.failed++;
+                } else if (known !== undefined) {
                     row['priorite_p'] = known;
                     reused++;
                     if (known) refreshJob.success++;
@@ -960,6 +985,16 @@ app.post('/api/mantis/refresh', async (req, res) => {
             refreshJob.isRunning = false;
         }
     })();
+
+    return { jobId: rid };
+};
+
+app.post('/api/mantis/refresh', (req, res) => {
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source' });
+    const result = startRefresh(source);
+    if (result.error) return res.status(result.status).json({ error: result.error });
+    res.json({ message: 'Refresh started', jobId: result.jobId });
 });
 
 app.get('/api/mantis/all', async (req, res) => {
@@ -1603,6 +1638,35 @@ app.delete('/api/documentation/items/:id', (req, res) => {
     writeDocDataAtomic(data);
     res.json({ success: true });
 });
+
+// --- Daily automatic sync (Paris time, MANTIS_AUTO_SYNC_TIME="HH:MM" or "off") ---
+const AUTO_SYNC_TIME = process.env.MANTIS_AUTO_SYNC_TIME || '07:00';
+const parisClock = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+});
+let lastAutoSyncDay = null;
+
+const checkAutoSync = () => {
+    const parts = Object.fromEntries(parisClock.formatToParts(new Date()).map(p => [p.type, p.value]));
+    const day = `${parts.year}-${parts.month}-${parts.day}`;
+    const time = `${parts.hour}:${parts.minute}`;
+    if (time < AUTO_SYNC_TIME || lastAutoSyncDay === day) return;
+    // Only within the hour following the scheduled time (no catch-up after a late restart)
+    const [h, m] = AUTO_SYNC_TIME.split(':').map(Number);
+    const [ch, cm] = time.split(':').map(Number);
+    if ((ch * 60 + cm) - (h * 60 + m) > 60) return;
+
+    lastAutoSyncDay = day;
+    Object.keys(MANTIS_SOURCES).forEach(source => {
+        const result = startRefresh(source);
+        console.log(`[AutoSync] ${day} ${time} ${source}: ${result.error || 'started ' + result.jobId}`);
+    });
+};
+
+if (/^\d{2}:\d{2}$/.test(AUTO_SYNC_TIME)) {
+    setInterval(checkAutoSync, 60 * 1000);
+    console.log(`[AutoSync] Daily Mantis sync at ${AUTO_SYNC_TIME} (Europe/Paris)`);
+}
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 

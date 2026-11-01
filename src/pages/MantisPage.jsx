@@ -7,13 +7,7 @@ import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
 
-// "SD - Incoterm FCA..." -> "SD", "FI-Modification..." -> "FI"
-const domainFromSummary = (summary) => {
-    const match = (summary || '').match(/^\s*([A-Za-z]{2,4})\s*-/);
-    return match ? match[1].toUpperCase() : '';
-};
-
-const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSummary = false }) => {
+const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
     const [searchParams] = useSearchParams();
     const currentTab = searchParams.get('tab') || 'default';
 
@@ -54,11 +48,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
             }
 
             const result = JSON.parse(text);
-            const issues = result.issues || [];
-            // Projects without the "Domaine (Toray)" field carry the domain as a summary prefix
-            setData(deriveDomainFromSummary
-                ? issues.map(row => row['Domaine (Toray)'] ? row : { ...row, 'Domaine (Toray)': domainFromSummary(row['Résumé']) })
-                : issues);
+            setData(result.issues || []);
             setMantisBaseUrl(result.baseUrl || '');
             setLastUpdate(result.lastUpdate);
             setIsCached(!!result.isFromCache);

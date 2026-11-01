@@ -5,17 +5,6 @@ export const navGroups = [
 
 export const navConfig = [
   {
-    id: 'mantis',
-    path: '/mantis',
-    label: 'Mantis Recette',
-    icon: '🐞',
-    tabs: [
-      { id: 'all-mantis', label: 'All Mantis' },
-      { id: 'sd-en-cours', label: 'SD en cours' },
-      { id: 'sd-testable', label: 'SD Testable' }
-    ]
-  },
-  {
     id: 'mantis-demarrage',
     path: '/mantis-demarrage',
     label: 'Mantis Démarrage',
@@ -27,18 +16,44 @@ export const navConfig = [
     ]
   },
   {
+    id: 'copro-demarrage',
+    path: '/copro-demarrage',
+    label: 'CoPro Démarrage',
+    icon: '🎯',
+    tabs: []
+  },
+  {
+    id: 'mantis',
+    path: '/mantis',
+    label: 'Mantis Recette',
+    icon: '🐞',
+    tabs: [
+      { id: 'all-mantis', label: 'All Mantis' },
+      { id: 'sd-en-cours', label: 'SD en cours' },
+      { id: 'sd-testable', label: 'SD Testable' }
+    ]
+  },
+  {
     id: 'copro-new',
     path: '/copro-new',
-    label: 'CoPro',
+    label: 'CoPro Recette',
     icon: '🆕',
     tabs: []
   },
   {
     id: 'pilotage',
     path: '/pilotage',
-    label: 'Pilotage',
+    label: 'Pilotage Recette',
     group: 'autres',
     icon: '📊',
+    tabs: []
+  },
+  {
+    id: 'pilotage-demarrage',
+    path: '/pilotage-demarrage',
+    label: 'Pilotage Démarrage',
+    group: 'autres',
+    icon: '📈',
     tabs: []
   },
   {

@@ -42,7 +42,8 @@ const isNotExcludedDomain = (row) => {
 
 const getCategoryType = (row) => {
     const cat = normalize(row['Catégorie']);
-    if (cat === 'projet') return 'projet';
+    // "Projet" (recette) or "[Toray] Projet" (démarrage)
+    if (cat === 'projet' || cat === '[toray] projet') return 'projet';
     if (cat.includes('toray') && cat.includes('ecart')) return 'evolution';
     return null;
 };
@@ -59,7 +60,7 @@ const isResolue = (row) => {
     return etat === 'résolu' && isAssignedReferent(row['Affecté à']);
 };
 
-const CoProNewPage = () => {
+const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
     const [data, setData] = useState([]);
     const [mantisBaseUrl, setMantisBaseUrl] = useState('');
     const [loading, setLoading] = useState(false);
@@ -79,7 +80,7 @@ const CoProNewPage = () => {
         setError(null);
         setDiag({ status: null, body: null });
         try {
-            const response = await fetch('/api/mantis/all');
+            const response = await fetch(`/api/mantis/all?source=${source}`);
             const status = response.status;
             const text = await response.text();
 
@@ -109,7 +110,7 @@ const CoProNewPage = () => {
         setJobStatus({ progress: 0, step: 'Démarrage du job...' });
 
         try {
-            const startRes = await fetch('/api/mantis/refresh', { method: 'POST' });
+            const startRes = await fetch(`/api/mantis/refresh?source=${source}`, { method: 'POST' });
             if (!startRes.ok) {
                 const text = await startRes.text();
                 setDiag({ status: startRes.status, body: text.slice(0, 300) });
@@ -119,7 +120,7 @@ const CoProNewPage = () => {
 
             const poll = setInterval(async () => {
                 try {
-                    const statusRes = await fetch(`/api/mantis/status/${jobId}`);
+                    const statusRes = await fetch(`/api/mantis/status/${jobId}?source=${source}`);
                     if (!statusRes.ok) return;
                     const status = await statusRes.json();
                     setJobStatus(status);
@@ -257,7 +258,7 @@ const CoProNewPage = () => {
         <div className="mantis-container">
             <div className={mantisStyles.pageHeader}>
                 <div>
-                    <h2>CoPro</h2>
+                    <h2>{title}</h2>
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
                         <span style={{ color: isCached ? 'var(--color-amber)' : 'var(--color-emerald)' }}>
                             ● Source: {isCached ? 'Cache' : 'Fresh'}
@@ -377,9 +378,9 @@ const CoProNewPage = () => {
                     <DataTable
                         data={encoursData}
                         columns={columns}
-                        storageKey="copro_new_encours_column_order"
-                        tabId="copro-new-encours"
-                        filenamePrefix="copro_new_encours"
+                        storageKey={`copro_${source}_encours_column_order`}
+                        tabId={`copro-${source}-encours`}
+                        filenamePrefix={`copro_${source}_encours`}
                     />
                 ) : (
                     !loading && (
@@ -406,9 +407,9 @@ const CoProNewPage = () => {
                     <DataTable
                         data={resoluesData}
                         columns={columns}
-                        storageKey="copro_new_resolues_column_order"
-                        tabId="copro-new-resolues"
-                        filenamePrefix="copro_new_resolues"
+                        storageKey={`copro_${source}_resolues_column_order`}
+                        tabId={`copro-${source}-resolues`}
+                        filenamePrefix={`copro_${source}_resolues`}
                     />
                 ) : (
                     !loading && (
