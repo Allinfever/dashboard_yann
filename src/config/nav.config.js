@@ -12,7 +12,8 @@ export const navConfig = [
     tabs: [
       { id: 'all-mantis', label: 'All Mantis' },
       { id: 'sd-en-cours', label: 'SD en cours' },
-      { id: 'sd-testable', label: 'SD Testable' }
+      { id: 'sd-testable', label: 'SD Testable' },
+      { id: 'statistiques', label: 'Statistiques' }
     ]
   },
   {
@@ -30,7 +31,8 @@ export const navConfig = [
     tabs: [
       { id: 'all-mantis', label: 'All Mantis' },
       { id: 'sd-en-cours', label: 'SD en cours' },
-      { id: 'sd-testable', label: 'SD Testable' }
+      { id: 'sd-testable', label: 'SD Testable' },
+      { id: 'statistiques', label: 'Statistiques' }
     ]
   },
   {

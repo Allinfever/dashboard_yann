@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import DataTable from '../components/UI/DataTable';
 import CoproSummary from '../components/Mantis/CoproSummary';
 import MantisFilters from '../components/Mantis/MantisFilters';
+import MantisStats from '../components/Mantis/MantisStats';
 import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
@@ -265,6 +266,8 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
             {currentTab === 'synthese-copro' ? (
                 <CoproSummary data={data} loading={loading} />
+            ) : currentTab === 'statistiques' ? (
+                data.length > 0 && <MantisStats data={displayedData} />
             ) : displayedData.length > 0 ? (
                 <div>
                     <DataTable data={displayedData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />

@@ -1,0 +1,152 @@
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+}
+
+.kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1rem 1.1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+}
+
+.kpiLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.kpiValue {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpiSub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 1.25rem;
+}
+
+.card {
+    padding: 1.25rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+    min-width: 0;
+}
+
+.cardTitle {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+}
+
+.legend i.dashed {
+    height: 0;
+    width: 14px;
+    border-width: 0;
+    border-top: 2px dashed;
+    border-radius: 0;
+}
+
+.heatmap {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 2px;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.heatmap th {
+    padding: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.heatmap td {
+    padding: 0.4rem 0.3rem;
+    text-align: center;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.heatmap .heatLabel {
+    text-align: left;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.heatmap .heatZero {
+    color: var(--text-dim);
+}
+
+.heatmap .heatTotal {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.note {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.empty {
+    padding: 4rem;
+    text-align: center;
+    color: var(--text-dim);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+}
+
+.emptySmall {
+    padding: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}

@@ -112,6 +112,12 @@ export const mantisTabsConfig = [
         rulesText: 'Domaine (Toray) = RDD'
     },
     {
+        tabId: 'statistiques',
+        label: 'Statistiques',
+        filterFn: (row) => !(row['priorite_p'] || '').toUpperCase().includes('P3'),
+        rulesText: 'Hors P3'
+    },
+    {
         tabId: 'all-mantis',
         label: 'All Mantis',
         filterFn: () => true,
