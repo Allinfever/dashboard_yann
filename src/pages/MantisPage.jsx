@@ -5,7 +5,7 @@ import CoproSummary from '../components/Mantis/CoproSummary';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
 
-const MantisPage = () => {
+const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
     const [searchParams] = useSearchParams();
     const currentTab = searchParams.get('tab') || 'default';
 
@@ -33,7 +33,7 @@ const MantisPage = () => {
         setError(null);
         setDiag({ status: null, body: null });
         try {
-            const response = await fetch('/api/mantis/all');
+            const response = await fetch(`/api/mantis/all?source=${source}`);
             const status = response.status;
             const text = await response.text();
 
@@ -63,7 +63,7 @@ const MantisPage = () => {
         setJobStatus({ progress: 0, step: 'Démarrage du job...' });
 
         try {
-            const startRes = await fetch('/api/mantis/refresh', { method: 'POST' });
+            const startRes = await fetch(`/api/mantis/refresh?source=${source}`, { method: 'POST' });
             if (!startRes.ok) {
                 const text = await startRes.text();
                 setDiag({ status: startRes.status, body: text.slice(0, 300) });
@@ -73,7 +73,7 @@ const MantisPage = () => {
 
             const poll = setInterval(async () => {
                 try {
-                    const statusRes = await fetch(`/api/mantis/status/${jobId}`);
+                    const statusRes = await fetch(`/api/mantis/status/${jobId}?source=${source}`);
                     if (!statusRes.ok) return; // Keep polling if transient error
                     const status = await statusRes.json();
                     setJobStatus(status);
@@ -195,7 +195,7 @@ const MantisPage = () => {
         <div className="mantis-container">
             <div className={styles.pageHeader}>
                 <div>
-                    <h2>Mantis - {currentTabConfig.label}</h2>
+                    <h2>{title} - {currentTabConfig.label}</h2>
                     {/* DIAGNOSTIC BAR */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
                         <span style={{ color: isCached ? 'var(--color-amber)' : 'var(--color-emerald)' }}>

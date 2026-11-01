@@ -16,6 +16,17 @@ export const navConfig = [
     ]
   },
   {
+    id: 'mantis-demarrage',
+    path: '/mantis-demarrage',
+    label: 'Mantis Démarrage',
+    icon: '🚀',
+    tabs: [
+      { id: 'all-mantis', label: 'All Mantis' },
+      { id: 'sd-en-cours', label: 'SD en cours' },
+      { id: 'sd-testable', label: 'SD Testable' }
+    ]
+  },
+  {
     id: 'copro-new',
     path: '/copro-new',
     label: 'CoPro',

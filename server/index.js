@@ -36,8 +36,26 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 // --- Cache for Priority ---
 const priorityCache = new Map();
 
-// --- Background Job State ---
-let refreshJob = {
+// --- Mantis Sources (one saved Mantis filter + one cache file each) ---
+const MANTIS_SOURCES = {
+    recette: {
+        queryId: process.env.MANTIS_SOURCE_QUERY_ID || '1291',
+        cacheFile: path.join(__dirname, 'data/mantis_all_mantis.json')
+    },
+    demarrage: {
+        // No saved filter: the whole project is exported, looked up by name
+        projectName: 'TORAY - Démarrage',
+        cacheFile: path.join(__dirname, 'data/mantis_demarrage.json')
+    }
+};
+
+const getSource = (req) => {
+    const key = (req.query.source || 'recette').toString();
+    return MANTIS_SOURCES[key] ? key : null;
+};
+
+// --- Background Job State (per source) ---
+const emptyJob = () => ({
     isRunning: false,
     current: 0,
     total: 0,
@@ -46,7 +64,8 @@ let refreshJob = {
     failed: 0,
     lastUpdate: null,
     error: null
-};
+});
+const refreshJobs = Object.fromEntries(Object.keys(MANTIS_SOURCES).map(key => [key, emptyJob()]));
 
 // --- Helper Class ---
 class MantisClient {
@@ -202,9 +221,7 @@ async function fetchPriority(mantis, issueId) {
     }
 }
 
-async function performMantisExport(mantis, isDebug = false) {
-    const { MANTIS_SOURCE_QUERY_ID } = process.env;
-    const qid = MANTIS_SOURCE_QUERY_ID || '1291';
+async function performMantisExport(mantis, isDebug = false, qid = MANTIS_SOURCES.recette.queryId) {
 
     await mantis.login();
 
@@ -218,18 +235,83 @@ async function performMantisExport(mantis, isDebug = false) {
     return isDebug ? { length: res.data.length } : res.data;
 }
 
-const CACHE_FILE = path.join(__dirname, 'data/mantis_all_mantis.json');
+// "TORAY -Démarrage", "toray - démarrage" and "TORAY - Démarrage" all compare equal
+const normalizeProjectName = (name) => (name || '').normalize('NFC').replace(/\s*-\s*/g, '-').replace(/\s+/g, ' ').trim().toLowerCase();
+
+const matchesProject = (text, projectName) => {
+    // Sub-projects can be displayed as "Parent » Child"
+    const label = (text || '').split('»').pop();
+    return normalizeProjectName(label) === normalizeProjectName(projectName);
+};
+
+async function performProjectExport(mantis, projectName) {
+    await mantis.login();
+
+    mantis.log(`Step 4: Find project "${projectName}"`);
+    let res = await mantis.request('GET', '/view_all_bug_page.php');
+    let $ = cheerio.load(res.data);
+
+    // Mantis 2.x navbar links: set_project.php?project_id=N
+    let projectId = null;
+    let switchUrl = null;
+    $('a[href*="set_project.php"]').each((i, el) => {
+        const href = $(el).attr('href');
+        const match = href.match(/project_id=(\d+)/);
+        if (match && matchesProject($(el).text(), projectName)) {
+            projectId = match[1];
+            switchUrl = href;
+            return false;
+        }
+    });
+
+    // Older themes: <form action="set_project.php"><select name="project_id">
+    let switchForm = null;
+    if (!projectId) {
+        $('select[name="project_id"] option').each((i, el) => {
+            if (matchesProject($(el).text(), projectName)) {
+                projectId = ($(el).attr('value') || '').split(';').pop();
+                const form = $(el).closest('form');
+                const inputs = {};
+                form.find('input').each((j, input) => { inputs[$(input).attr('name')] = $(input).attr('value') || ''; });
+                inputs['project_id'] = $(el).attr('value');
+                switchForm = { action: form.attr('action') || 'set_project.php', inputs };
+                return false;
+            }
+        });
+    }
+    if (!projectId) throw new Error(`Projet Mantis "${projectName}" introuvable pour ce compte`);
+
+    mantis.log(`Step 5: Switch to project ${projectId}`);
+    if (switchUrl) {
+        await mantis.request('GET', '/' + switchUrl.replace(/^.*?(set_project\.php)/, '$1'));
+    } else {
+        await mantis.request('POST', '/' + switchForm.action.replace(/^\//, ''), switchForm.inputs, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+    }
+
+    mantis.log('Step 6: Filter on all statuses');
+    await mantis.request('GET', '/view_all_set.php', null, {
+        params: { type: '1', 'hide_status[]': '-2', 'project_id[]': projectId, t: Date.now() }
+    });
+
+    mantis.log('Step 7: Export CSV');
+    res = await mantis.request('GET', '/csv_export.php', null, { responseType: 'text' });
+    if (typeof res.data === 'string' && res.data.includes('<html')) throw new Error('Export returned HTML');
+    return res.data;
+}
 
 // Ensure data dir exists
-if (!fs.existsSync(path.dirname(CACHE_FILE))) {
-    fs.mkdirSync(path.dirname(CACHE_FILE), { recursive: true });
+if (!fs.existsSync(path.join(__dirname, 'data'))) {
+    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
 }
 
 // Helper for cache
-const readCache = () => {
-    if (fs.existsSync(CACHE_FILE)) {
+const readCache = (source = 'recette') => {
+    const cacheFile = MANTIS_SOURCES[source].cacheFile;
+    if (fs.existsSync(cacheFile)) {
         try {
-            return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+            return JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
         } catch (e) {
             return null;
         }
@@ -237,8 +319,9 @@ const readCache = () => {
     return null;
 };
 
-const writeCacheAtomic = (data, summary) => {
-    const tempFile = CACHE_FILE + '.tmp';
+const writeCacheAtomic = (data, summary, source = 'recette') => {
+    const cacheFile = MANTIS_SOURCES[source].cacheFile;
+    const tempFile = cacheFile + '.tmp';
     const content = JSON.stringify({
         data,
         lastUpdated: new Date().toISOString(),
@@ -246,7 +329,7 @@ const writeCacheAtomic = (data, summary) => {
     }, null, 2);
 
     fs.writeFileSync(tempFile, content);
-    fs.renameSync(tempFile, CACHE_FILE);
+    fs.renameSync(tempFile, cacheFile);
 };
 
 // --- Full Extraction Jobs State ---
@@ -733,6 +816,9 @@ app.post('/api/mantis/export/xlsx', async (req, res) => {
 
 
 app.get('/api/mantis/refresh-status', (req, res) => {
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source' });
+    const refreshJob = refreshJobs[source];
     res.json({
         ...refreshJob,
         progress: refreshJob.total > 0 ? (refreshJob.current / refreshJob.total) * 100 : 0,
@@ -741,7 +827,10 @@ app.get('/api/mantis/refresh-status', (req, res) => {
 });
 
 app.get('/api/mantis/status/:id', (req, res) => {
-    // For now we use the global job status
+    // For now we use the job status of the source
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source' });
+    const refreshJob = refreshJobs[source];
     res.json({
         ...refreshJob,
         progress: refreshJob.total > 0 ? (refreshJob.current / refreshJob.total) * 100 : 0,
@@ -751,7 +840,10 @@ app.get('/api/mantis/status/:id', (req, res) => {
 
 
 app.post('/api/mantis/refresh', async (req, res) => {
-    if (refreshJob.isRunning) {
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source' });
+    const { queryId, projectName } = MANTIS_SOURCES[source];
+    if (refreshJobs[source].isRunning) {
         return res.status(409).json({ error: 'Refresh already in progress' });
     }
 
@@ -766,25 +858,27 @@ app.post('/api/mantis/refresh', async (req, res) => {
 
     (async () => {
         const startTime = Date.now();
-        refreshJob = {
+        const refreshJob = refreshJobs[source] = {
+            ...emptyJob(),
             isRunning: true,
-            current: 0,
-            total: 0,
-            startTime: new Date().toISOString(),
-            success: 0,
-            failed: 0,
-            lastUpdate: null,
-            error: null
+            startTime: new Date().toISOString()
         };
 
         try {
-            const csv = await performMantisExport(mantis);
+            const csv = projectName
+                ? await performProjectExport(mantis, projectName)
+                : await performMantisExport(mantis, false, queryId);
             if (logger.isHtml(csv)) {
                 throw new Error('Mantis session expired or login required (HTML detected)');
             }
 
             const Papa = require('papaparse');
-            const rows = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+            let rows = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+            if (projectName) {
+                // Safety net: keep only the requested project's tickets
+                rows = rows.filter(row => matchesProject(row['Projet'], projectName));
+                if (rows.length === 0) throw new Error(`Aucun ticket trouvé pour le projet "${projectName}"`);
+            }
 
 
             refreshJob.total = rows.length;
@@ -816,11 +910,11 @@ app.post('/api/mantis/refresh', async (req, res) => {
             writeCacheAtomic(rows, {
                 totalRows: refreshJob.total,
                 enriched: { total: refreshJob.current, success: refreshJob.success, failed: refreshJob.failed }
-            });
-            console.log(`[Job] Finished in ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
+            }, source);
+            console.log(`[Job:${source}] Finished in ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
 
         } catch (e) {
-            console.error('[Job] Failed:', e.message);
+            console.error(`[Job:${source}] Failed:`, e.message);
             refreshJob.error = e.message;
         } finally {
             refreshJob.isRunning = false;
@@ -830,8 +924,10 @@ app.post('/api/mantis/refresh', async (req, res) => {
 
 app.get('/api/mantis/all', async (req, res) => {
     const rid = Date.now().toString();
+    const source = getSource(req);
+    if (!source) return res.status(400).json({ error: 'Unknown source', requestId: rid });
     try {
-        const cache = readCache();
+        const cache = readCache(source);
         if (cache) {
             return res.json({
                 issues: cache.data,
