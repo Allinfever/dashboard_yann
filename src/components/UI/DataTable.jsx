@@ -22,6 +22,7 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { FileSpreadsheet } from 'lucide-react';
 import styles from './DataTable.module.css';
 
 // --- Blacklisted columns (never show) ---
@@ -338,16 +339,14 @@ const DataTable = ({
                         className={styles.exportBtn}
                         disabled={isExporting}
                     >
-                        {isExporting ? 'Génération...' : '📊 Exporter Excel'}
+                        <FileSpreadsheet size={15} aria-hidden="true" />
+                        {isExporting ? 'Génération...' : 'Exporter Excel'}
                     </button>
                     <button onClick={resetOrder} className={styles.resetBtn}>
                         Réinitialiser colonnes
                     </button>
                 </div>
 
-                <div className={styles.paginationInfo}>
-                    {filteredCount} lignes filtrées sur {data.length}
-                </div>
             </div>
 
             <div className={styles.tableWrapper}>

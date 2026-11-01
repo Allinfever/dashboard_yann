@@ -4,8 +4,8 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
-    background: rgba(var(--fg-rgb), 0.02);
-    border: 1px solid rgba(var(--fg-rgb), 0.05);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--border-radius-md);
 }
 
@@ -52,9 +52,9 @@
 }
 
 .triggerActive {
-    color: var(--text-strong);
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(59, 130, 246, 0.12);
+    color: #fff;
+    border-color: var(--color-primary);
+    background: var(--color-primary);
 }
 
 .badge {
@@ -66,6 +66,11 @@
     color: #fff;
     background: var(--color-primary);
     border-radius: 9px;
+}
+
+.triggerActive .badge {
+    color: var(--color-primary);
+    background: #fff;
 }
 
 .caret {
@@ -84,7 +89,7 @@
     background: var(--surface-popover);
     border: 1px solid rgba(var(--fg-rgb), 0.1);
     border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .panelRight {

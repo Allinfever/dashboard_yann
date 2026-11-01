@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import {
+    Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, Sun, Moon, ChevronRight, Circle
+} from 'lucide-react';
 import { navConfig, navGroups } from '../../config/nav.config';
 import styles from './Sidebar.module.css';
 import classNames from 'classnames';
 
 const isInSection = (pathname, path) => pathname === path || pathname.startsWith(`${path}/`);
+
+// Icons referenced by name in nav.config.js
+const ICONS = { Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, Sun, Moon };
+
+const NavIcon = ({ name }) => {
+    const Icon = ICONS[name] || Circle;
+    return <span className={styles.icon}><Icon size={16} strokeWidth={1.75} aria-hidden="true" /></span>;
+};
 
 const renderNavLink = (item, nested = false) => {
     // Determine the target URL with the default first tab if available
@@ -19,7 +30,7 @@ const renderNavLink = (item, nested = false) => {
                 classNames(styles.navLink, { [styles.active]: isActive, [styles.nested]: nested })
             }
         >
-            <span className={styles.icon}>{item.icon}</span>
+            <NavIcon name={item.icon} />
             {item.label}
         </NavLink>
     );
@@ -45,9 +56,9 @@ const NavGroup = ({ group, items }) => {
                 onClick={() => setOpen(o => !o)}
                 aria-expanded={open}
             >
-                <span className={styles.icon}>{group.icon}</span>
+                <NavIcon name={group.icon} />
                 {group.label}
-                <span className={classNames(styles.chevron, { [styles.chevronOpen]: open })}>▸</span>
+                <span className={classNames(styles.chevron, { [styles.chevronOpen]: open })}><ChevronRight size={14} aria-hidden="true" /></span>
             </button>
             {open && (
                 <div className={styles.groupItems}>
@@ -78,7 +89,7 @@ const ThemeToggle = () => {
             onClick={() => setTheme(isLight ? 'dark' : 'light')}
             title={isLight ? 'Passer en mode sombre' : 'Passer en mode clair'}
         >
-            <span className={styles.icon}>{isLight ? '🌙' : '☀️'}</span>
+            <NavIcon name={isLight ? 'Moon' : 'Sun'} />
             {isLight ? 'Mode sombre' : 'Mode clair'}
         </button>
     );

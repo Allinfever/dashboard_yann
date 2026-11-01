@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
-    ResponsiveContainer, LineChart, Line, BarChart, Bar,
+    ResponsiveContainer, BarChart, Bar, LabelList,
     XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts';
+import { AlertTriangle } from 'lucide-react';
 import { computeMantisStats, PRIORITY_KEYS } from '../../utils/mantisStats';
+import { PRIORITY_COLORS, FLOW_COLORS, HEAT_RGB } from '../../config/colors';
 import styles from './MantisStats.module.css';
 
-const PRIORITY_COLORS = { P1: '#e34948', P2: '#eda100', P3: '#3b82f6', 'Non renseignée': '#64748b' };
-const FLOW_COLORS = { created: '#3b82f6', closed: '#10b981' };
 const AXIS = { stroke: '#64748b', fontSize: 11, tickLine: false, axisLine: false };
 // SVG attributes can't read CSS variables: neutral grays that work in both themes
 const GRID = { stroke: '#94a3b8', strokeOpacity: 0.2, vertical: false };
@@ -47,7 +47,7 @@ const StackedPriorityBars = ({ data, keys, layout = 'horizontal', height }) => (
                 )}
                 <Tooltip {...TOOLTIP} />
                 {keys.map((k, i) => (
-                    <Bar key={k} dataKey={k} stackId="p" fill={PRIORITY_COLORS[k]} maxBarSize={layout === 'vertical' ? 18 : 40}
+                    <Bar key={k} dataKey={k} stackId="p" fill={PRIORITY_COLORS[k]} maxBarSize={layout === 'vertical' ? 16 : 32}
                         radius={i === keys.length - 1 ? (layout === 'vertical' ? [0, 3, 3, 0] : [3, 3, 0, 0]) : 0} />
                 ))}
             </BarChart>
@@ -58,7 +58,7 @@ const StackedPriorityBars = ({ data, keys, layout = 'horizontal', height }) => (
 const heatColor = (value, max) => {
     if (!value) return 'transparent';
     const alpha = 0.15 + 0.7 * (value / max);
-    return `rgba(59, 130, 246, ${alpha.toFixed(2)})`;
+    return `rgba(${HEAT_RGB}, ${alpha.toFixed(2)})`;
 };
 
 const isP3 = (row) => (row['priorite_p'] || '').toUpperCase().includes('P3');
@@ -136,10 +136,13 @@ const MantisStats = ({ data, source = 'recette' }) => {
                     <span className={styles.kpiValue}>{kpis.medianAge} j</span>
                     <span className={styles.kpiSub}>moyenne {kpis.meanAge} j</span>
                 </div>
-                <div className={styles.kpi}>
-                    <span className={styles.kpiLabel}>Sans activité &gt; 30 jours</span>
-                    <span className={styles.kpiValue} style={{ color: kpis.stale ? 'var(--color-amber)' : undefined }}>{kpis.stale}</span>
-                    <span className={styles.kpiSub}>tickets ouverts</span>
+                <div className={`${styles.kpi} ${kpis.stale ? styles.kpiAlert : ''}`}>
+                    <span className={styles.kpiLabel}>
+                        {kpis.stale > 0 && <AlertTriangle size={13} aria-hidden="true" />}
+                        Sans activité &gt; 30 jours
+                    </span>
+                    <span className={styles.kpiValue}>{kpis.stale}</span>
+                    <span className={styles.kpiSub}>tickets ouverts à relancer</span>
                 </div>
                 <div className={styles.kpi}>
                     <span className={styles.kpiLabel}>Suspendus</span>
@@ -150,17 +153,17 @@ const MantisStats = ({ data, source = 'recette' }) => {
 
             <section className={styles.card}>
                 <h4 className={styles.cardTitle}>Flux hebdomadaire : créés et clôturés (12 semaines)</h4>
-                <Legend items={[['Créés', FLOW_COLORS.created], ['Clôturés (Validé, Fermé, Annulé)', FLOW_COLORS.closed, true]]} />
+                <Legend items={[['Créés', FLOW_COLORS.created], ['Clôturés (Validé, Fermé, Annulé)', FLOW_COLORS.closed]]} />
                 <div style={{ height: 220 }}>
                     <ResponsiveContainer>
-                        <LineChart data={stats.weeks} margin={{ left: 0, right: 8 }}>
+                        <BarChart data={stats.weeks} margin={{ left: 0, right: 8 }} barGap={2} barCategoryGap="28%">
                             <CartesianGrid {...GRID} />
                             <XAxis dataKey="label" {...AXIS} />
                             <YAxis allowDecimals={false} width={30} {...AXIS} />
-                            <Tooltip {...TOOLTIP} cursor={{ stroke: '#94a3b8', strokeOpacity: 0.4 }} />
-                            <Line type="monotone" dataKey="created" name="Créés" stroke={FLOW_COLORS.created} strokeWidth={2} dot={{ r: 3 }} />
-                            <Line type="monotone" dataKey="closed" name="Clôturés" stroke={FLOW_COLORS.closed} strokeWidth={2} strokeDasharray="5 4" dot={{ r: 3 }} />
-                        </LineChart>
+                            <Tooltip {...TOOLTIP} />
+                            <Bar dataKey="created" name="Créés" fill={FLOW_COLORS.created} radius={[3, 3, 0, 0]} maxBarSize={18} />
+                            <Bar dataKey="closed" name="Clôturés" fill={FLOW_COLORS.closed} radius={[3, 3, 0, 0]} maxBarSize={18} />
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
             </section>
@@ -206,7 +209,9 @@ const MantisStats = ({ data, source = 'recette' }) => {
                                 <XAxis type="number" allowDecimals={false} {...AXIS} />
                                 <YAxis type="category" dataKey="name" width={150} {...AXIS} />
                                 <Tooltip {...TOOLTIP} />
-                                <Bar dataKey="value" name="Tickets" fill="#3b82f6" maxBarSize={18} radius={[0, 3, 3, 0]} />
+                                <Bar dataKey="value" name="Tickets" fill="#94a3b8" maxBarSize={16} radius={[0, 3, 3, 0]}>
+                                    <LabelList dataKey="value" position="right" fill="#94a3b8" fontSize={11} />
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import DataTable from '../components/UI/DataTable';
 import styles from './CoProNewPage.module.css';
 import mantisStyles from './MantisPage.module.css';
+import { priorityColor } from '../config/colors';
+import { TriangleAlert, RefreshCw } from 'lucide-react';
 import { formatSyncDate, loadErrorMessage, refreshErrorMessage, jobErrorMessage } from '../utils/mantisDisplay';
 
 const ENCOURS_STATES = ['nouveau', 'accepté', 'chiffrage', 'validation chiffrage', 'réalisation'];
@@ -197,7 +199,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
 
     const columns = useMemo(() => {
         if (data.length === 0) return [];
-        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Affecté à', 'Catégorie', 'Mis à jour', 'État', 'Résumé', 'Domaine (Toray)'];
+        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Résumé', 'État', 'Affecté à', 'Mis à jour', 'Domaine (Toray)', 'Catégorie'];
         let allKeys = Object.keys(data[0]);
         let sortedKeys = [...DEFAULT_ORDER.filter(key => allKeys.includes(key))];
         let remainingKeys = allKeys.filter(key => !DEFAULT_ORDER.includes(key));
@@ -238,7 +240,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                                 </div>
                             );
                         }
-                        const color = val.includes('P1') ? 'var(--color-rose)' : val.includes('P2') ? 'var(--color-amber)' : 'var(--color-primary)';
+                        const color = priorityColor(val);
                         return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(var(--fg-rgb),0.02)' }}>{val}</span>;
                     }
                 };
@@ -258,7 +260,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
             <div className={mantisStyles.pageHeader}>
                 <div>
                     <h2>{title}</h2>
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
+                    <div className={mantisStyles.pageMeta}>
                         <span>
                             {encoursData.length} en cours · {resoluesData.length} résolue{resoluesData.length > 1 ? 's' : ''} · {data.length} tickets au total
                         </span>
@@ -270,7 +272,8 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
 
                 <div className={mantisStyles.statusContainer}>
                     <button onClick={handleRefresh} disabled={loading || !!jobStatus} className={mantisStyles.refreshBtn}>
-                        {loading || jobStatus ? 'En cours...' : 'Synchroniser Mantis'}
+                        <RefreshCw size={15} aria-hidden="true" className={loading || jobStatus ? 'spin' : ''} />
+                        {loading || jobStatus ? 'Synchronisation...' : 'Synchroniser Mantis'}
                     </button>
                 </div>
             </div>
@@ -288,42 +291,25 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr className={styles.summaryRowEncours}>
-                                <td className={styles.summaryFirstCol}>Encours</td>
-                                <td className={styles.summaryValue}>{summary.encours.projet.total}</td>
-                                <td className={styles.summaryValue}>{summary.encours.evolution.total}</td>
-                                <td className={styles.summaryValue}>{summary.encours.total.total}</td>
-                            </tr>
-                            <tr className={styles.summaryRowEncoursSub}>
-                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P1</td>
-                                <td>{summary.encours.projet.p1}</td>
-                                <td>{summary.encours.evolution.p1}</td>
-                                <td>{summary.encours.total.p1}</td>
-                            </tr>
-                            <tr className={styles.summaryRowEncoursSub}>
-                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P2</td>
-                                <td>{summary.encours.projet.p2}</td>
-                                <td>{summary.encours.evolution.p2}</td>
-                                <td>{summary.encours.total.p2}</td>
-                            </tr>
-                            <tr className={styles.summaryRowResolues}>
-                                <td className={styles.summaryFirstCol}>Résolues</td>
-                                <td className={styles.summaryValue}>{summary.resolues.projet.total}</td>
-                                <td className={styles.summaryValue}>{summary.resolues.evolution.total}</td>
-                                <td className={styles.summaryValue}>{summary.resolues.total.total}</td>
-                            </tr>
-                            <tr className={styles.summaryRowResoluesSub}>
-                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P1</td>
-                                <td>{summary.resolues.projet.p1}</td>
-                                <td>{summary.resolues.evolution.p1}</td>
-                                <td>{summary.resolues.total.p1}</td>
-                            </tr>
-                            <tr className={styles.summaryRowResoluesSub}>
-                                <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont P2</td>
-                                <td>{summary.resolues.projet.p2}</td>
-                                <td>{summary.resolues.evolution.p2}</td>
-                                <td>{summary.resolues.total.p2}</td>
-                            </tr>
+                            {[['En cours', 'encours', styles.summaryRowEncours, styles.summaryRowEncoursSub],
+                              ['Résolues', 'resolues', styles.summaryRowResolues, styles.summaryRowResoluesSub]].map(([label, key, rowClass, subClass]) => (
+                                <React.Fragment key={key}>
+                                    <tr className={rowClass}>
+                                        <td className={styles.summaryFirstCol}>{label}</td>
+                                        {['projet', 'evolution', 'total'].map(col => (
+                                            <td key={col} className={`${styles.summaryValue} ${summary[key][col].total ? '' : styles.zero}`}>{summary[key][col].total}</td>
+                                        ))}
+                                    </tr>
+                                    {['p1', 'p2'].map(p => (
+                                        <tr key={p} className={subClass}>
+                                            <td className={`${styles.summaryFirstCol} ${styles.summarySubLabel}`}>Dont {p.toUpperCase()}</td>
+                                            {['projet', 'evolution', 'total'].map(col => (
+                                                <td key={col} className={summary[key][col][p] ? '' : styles.zero}>{summary[key][col][p]}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </React.Fragment>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -331,7 +317,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
 
             {error && (
                 <div style={{ border: '1px solid var(--color-rose)', background: 'rgba(244, 63, 94, 0.05)', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--color-rose)' }}>⚠️ {error}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--color-rose)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><TriangleAlert size={16} aria-hidden="true" /> {error}</div>
                     {diag.body && (
                         <details style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                             <summary style={{ cursor: 'pointer' }}>Détails techniques</summary>
@@ -363,7 +349,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                 <div className={styles.sectionHeader}>
                     <h3 className={styles.sectionTitle}>
                         <span className={styles.dotEncours}></span>
-                        Encours
+                        En cours
                         <span className={styles.count}>{encoursData.length}</span>
                     </h3>
                     <div className={styles.sectionRules}>
@@ -374,14 +360,14 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                     <DataTable
                         data={encoursData}
                         columns={columns}
-                        storageKey={`copro_${source}_encours_column_order`}
+                        storageKey={`copro_${source}_encours_column_order_v2`}
                         tabId={`copro-${source}-encours`}
                         filenamePrefix={`copro_${source}_encours`}
                     />
                 ) : (
                     !loading && (
                         <div className={styles.emptyState}>
-                            Aucune donnée correspondant aux critères Encours.
+                            Aucun ticket en cours selon ces critères.
                         </div>
                     )
                 )}
@@ -403,14 +389,14 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                     <DataTable
                         data={resoluesData}
                         columns={columns}
-                        storageKey={`copro_${source}_resolues_column_order`}
+                        storageKey={`copro_${source}_resolues_column_order_v2`}
                         tabId={`copro-${source}-resolues`}
                         filenamePrefix={`copro_${source}_resolues`}
                     />
                 ) : (
                     !loading && (
                         <div className={styles.emptyState}>
-                            Aucune donnée correspondant aux critères Résolues.
+                            Aucun ticket résolu selon ces critères.
                         </div>
                     )
                 )}

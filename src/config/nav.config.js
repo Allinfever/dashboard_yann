@@ -1,6 +1,7 @@
+// `icon` is a lucide-react icon name
 // Les entrées avec `group` sont rangées sous l'en-tête correspondant de la sidebar
 export const navGroups = [
-  { id: 'autres', label: 'Autres', icon: '🗂️' }
+  { id: 'autres', label: 'Autres', icon: 'FolderOpen' }
 ];
 
 export const navConfig = [
@@ -8,7 +9,7 @@ export const navConfig = [
     id: 'mantis-demarrage',
     path: '/mantis-demarrage',
     label: 'Mantis Démarrage',
-    icon: '🚀',
+    icon: 'Rocket',
     tabs: [
       { id: 'all-mantis', label: 'All Mantis' },
       { id: 'sd-en-cours', label: 'SD en cours' },
@@ -20,14 +21,14 @@ export const navConfig = [
     id: 'copro-demarrage',
     path: '/copro-demarrage',
     label: 'CoPro Démarrage',
-    icon: '🎯',
+    icon: 'Target',
     tabs: []
   },
   {
     id: 'mantis',
     path: '/mantis',
     label: 'Mantis Recette',
-    icon: '🐞',
+    icon: 'Bug',
     tabs: [
       { id: 'all-mantis', label: 'All Mantis' },
       { id: 'sd-en-cours', label: 'SD en cours' },
@@ -39,7 +40,7 @@ export const navConfig = [
     id: 'copro-new',
     path: '/copro-new',
     label: 'CoPro Recette',
-    icon: '🆕',
+    icon: 'ClipboardList',
     tabs: []
   },
   {
@@ -47,7 +48,7 @@ export const navConfig = [
     path: '/pilotage',
     label: 'Pilotage Recette',
     group: 'autres',
-    icon: '📊',
+    icon: 'ChartColumn',
     tabs: []
   },
   {
@@ -55,7 +56,7 @@ export const navConfig = [
     path: '/pilotage-demarrage',
     label: 'Pilotage Démarrage',
     group: 'autres',
-    icon: '📈',
+    icon: 'ChartLine',
     tabs: []
   },
   {
@@ -63,7 +64,7 @@ export const navConfig = [
     path: '/roadmap',
     label: 'Roadmap',
     group: 'autres',
-    icon: '🗓️',
+    icon: 'CalendarRange',
     tabs: []
   },
   {
@@ -71,7 +72,7 @@ export const navConfig = [
     path: '/open-topics',
     label: 'Sujets Ouverts',
     group: 'autres',
-    icon: '📂',
+    icon: 'FolderKanban',
     tabs: []
   },
   {
@@ -79,7 +80,7 @@ export const navConfig = [
     path: '/documentation',
     label: 'Documentation',
     group: 'autres',
-    icon: '📚',
+    icon: 'BookOpen',
     tabs: [
       { id: 'general', label: 'Général' },
       { id: 'technical', label: 'Technique' },
@@ -91,7 +92,7 @@ export const navConfig = [
     path: '/mantis-extractor',
     label: 'Mantis & Notes Extractor',
     group: 'autres',
-    icon: '📥',
+    icon: 'Download',
     tabs: []
   }
 ];

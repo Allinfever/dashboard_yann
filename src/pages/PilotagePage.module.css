@@ -2,7 +2,7 @@
     margin: 0 0 2rem 0;
     font-size: 2rem;
     color: var(--text-strong);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .sectionHeader {
@@ -196,7 +196,7 @@
     font-weight: 800;
     color: var(--text-strong);
     line-height: 1;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .donutLabel {
@@ -355,7 +355,7 @@
     font-size: 2rem;
     font-weight: 800;
     color: var(--text-strong);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .kpiSubValue {

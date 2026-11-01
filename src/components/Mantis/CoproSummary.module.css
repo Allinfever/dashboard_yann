@@ -31,7 +31,7 @@
     letter-spacing: 0.1em;
     font-size: 0.9rem;
     border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .table td {

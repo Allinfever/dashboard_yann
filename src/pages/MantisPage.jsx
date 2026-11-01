@@ -7,6 +7,8 @@ import MantisStats from '../components/Mantis/MantisStats';
 import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
+import { priorityColor } from '../config/colors';
+import { TriangleAlert, RefreshCw } from 'lucide-react';
 import { formatSyncDate, loadErrorMessage, refreshErrorMessage, jobErrorMessage } from '../utils/mantisDisplay';
 
 const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
@@ -145,7 +147,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
     const columns = useMemo(() => {
         if (data.length === 0) return [];
-        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Affecté à', 'Catégorie', 'Mis à jour', 'État', 'Résumé', 'Domaine (Toray)'];
+        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Résumé', 'État', 'Affecté à', 'Mis à jour', 'Domaine (Toray)', 'Catégorie'];
         let allKeys = Object.keys(data[0]);
         let sortedKeys = [...DEFAULT_ORDER.filter(key => allKeys.includes(key))];
         let remainingKeys = allKeys.filter(key => !DEFAULT_ORDER.includes(key));
@@ -186,7 +188,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                                 </div>
                             );
                         }
-                        const color = val.includes('P1') ? 'var(--color-rose)' : val.includes('P2') ? 'var(--color-amber)' : 'var(--color-primary)';
+                        const color = priorityColor(val);
                         return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(var(--fg-rgb),0.02)' }}>{val}</span>;
                     }
                 };
@@ -206,7 +208,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
             <div className={styles.pageHeader}>
                 <div>
                     <h2>{title} - {currentTabConfig.label}</h2>
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
+                    <div className={styles.pageMeta}>
                         <span>
                             {displayedData.length} ticket{displayedData.length > 1 ? 's' : ''} affiché{displayedData.length > 1 ? 's' : ''} sur {data.length}
                         </span>
@@ -218,14 +220,15 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
                 <div className={styles.statusContainer}>
                     <button onClick={handleRefresh} disabled={loading || !!jobStatus} className={styles.refreshBtn}>
-                        {loading || jobStatus ? 'En cours...' : 'Synchroniser Mantis'}
+                        <RefreshCw size={15} aria-hidden="true" className={loading || jobStatus ? 'spin' : ''} />
+                        {loading || jobStatus ? 'Synchronisation...' : 'Synchroniser Mantis'}
                     </button>
                 </div>
             </div>
 
             {error && (
                 <div className={styles.error} style={{ border: '1px solid var(--color-rose)', background: 'rgba(244, 63, 94, 0.05)', padding: '1.5rem', borderRadius: '12px' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--color-rose)' }}>⚠️ {error}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--color-rose)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><TriangleAlert size={16} aria-hidden="true" /> {error}</div>
                     {diag.body && (
                         <details style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                             <summary style={{ cursor: 'pointer' }}>Détails techniques</summary>
@@ -270,7 +273,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                 data.length > 0 && <MantisStats data={displayedData} source={source} />
             ) : displayedData.length > 0 ? (
                 <div>
-                    <DataTable data={displayedData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />
+                    <DataTable data={displayedData} columns={columns} storageKey="mantis_column_order_v2" tabId={currentTab} />
                     {currentTabConfig.rulesText && (
                         <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(var(--fg-rgb),0.03)', borderRadius: '12px', border: '1px solid rgba(var(--fg-rgb),0.05)', fontSize: '0.85rem' }}>
                             <strong style={{ color: 'var(--text-strong)' }}>Règles de sélection :</strong>
@@ -283,7 +286,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                     <div className="card" style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-dim)', borderStyle: 'dashed' }}>
                         {filteredData.length > 0
                             ? 'Aucun ticket ne correspond aux filtres sélectionnés.'
-                            : 'Aucune donnée correspondant aux critères.'}
+                            : 'Aucun ticket dans cet onglet pour le moment.'}
                     </div>
                 )
             )}

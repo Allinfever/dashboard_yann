@@ -4,7 +4,7 @@
     padding: 0 0;
     /* Align with content */
     margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .tabsList {
@@ -37,7 +37,7 @@
 }
 
 .tabButton:hover {
-    color: var(--color-slate-800);
+    color: var(--text-main);
 }
 
 .active {
