@@ -475,9 +475,12 @@ const DossierDetailPage = () => {
                             const Icon = TYPE_ICONS[s.type] || FileText;
                             const a = s.analysis;
                             const open = expanded === s.id;
+                            const fileUrl = s.file ? `/api/dossiers/${id}/sources/${s.id}/file` : null;
+                            const isMailFile = /\.(eml|msg)$/i.test(s.file?.name || '');
                             const imageUrl = s.file?.mimetype?.startsWith('image/') ? `/api/dossiers/${id}/sources/${s.id}/file?inline=1` : null;
                             return (
                                 <li key={s.id} id={`source-${s.id}`} className={classNames(styles.source, { [styles.sourceOpen]: open })}>
+                                    <div className={styles.sourceRow}>
                                     <button type="button" className={styles.sourceHead} onClick={() => setExpanded(open ? null : s.id)}>
                                         <span className={styles.ref}>{refs[s.id]}</span>
                                         <Icon size={15} className={styles.typeIcon} aria-label={SOURCE_TYPES[s.type]} />
@@ -487,6 +490,12 @@ const DossierDetailPage = () => {
                                         <span className={styles.sourceDate}>{formatDate(s.date || s.createdAt)}</span>
                                         <ChevronDown size={14} className={classNames(styles.chevron, { [styles.chevronOpen]: open })} />
                                     </button>
+                                    {isMailFile && (
+                                        <a className={styles.outlookBtn} href={fileUrl} title="Ouvrir le mail d'origine dans Outlook">
+                                            <Mail size={13} aria-hidden="true" /> Outlook
+                                        </a>
+                                    )}
+                                    </div>
                                     {imageUrl && (
                                         <button type="button" className={classNames(styles.thumb, { [styles.thumbLarge]: open })} onClick={() => setLightbox({ url: imageUrl, title: s.title })} title="Agrandir">
                                             <img src={imageUrl} alt={s.title} loading="lazy" />
@@ -522,7 +531,7 @@ const DossierDetailPage = () => {
                                             />
                                             <div className={styles.sourceActions}>
                                                 {s.textLength > 0 && <button type="button" className={styles.ghostBtn} onClick={() => toggleFullText(s.id)}><FileText size={13} /> {fullTexts[s.id] !== undefined ? 'Masquer le texte' : 'Texte'}</button>}
-                                                {s.file && <a className={styles.ghostBtn} href={`/api/dossiers/${id}/sources/${s.id}/file`}><Download size={13} /> {s.file.name}</a>}
+                                                {s.file && <a className={styles.ghostBtn} href={fileUrl}><Download size={13} /> {s.file.name}</a>}
                                                 {s.url && <a className={styles.ghostBtn} href={s.url} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /> Ouvrir</a>}
                                                 {s.mantisId && mantisLink(s.mantisId) && <a className={styles.ghostBtn} href={mantisLink(s.mantisId)} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /> Mantis</a>}
                                                 <button type="button" className={classNames(styles.ghostBtn, styles.dangerText)} onClick={() => deleteSource(s)}><Trash2 size={13} /> Retirer</button>

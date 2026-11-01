@@ -895,3 +895,36 @@
     border-radius: 6px;
     color: #fff;
 }
+
+/* Original email (.eml / .msg): downloaded, then opened by Outlook */
+.sourceRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sourceRow .sourceHead {
+    flex: 1;
+    min-width: 0;
+}
+
+.outlookBtn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: var(--border-radius-sm);
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--color-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.outlookBtn:hover {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
