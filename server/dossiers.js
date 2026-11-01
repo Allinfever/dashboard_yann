@@ -434,7 +434,8 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
                 s.analysis = analysis;
                 if (extracted.type === 'image' && analysis.transcription) s.text = analysis.transcription;
                 if (s.kind === 'text') s.type = analysis.type;
-                if ((s.kind === 'text' || s.kind === 'url') && analysis.titre) s.title = analysis.titre;
+                // Pasted screenshots arrive as "image.png": the analysis gives them a meaningful title
+                if ((s.kind === 'text' || s.kind === 'url' || extracted.type === 'image') && analysis.titre) s.title = analysis.titre;
                 if (!s.date && /^\d{4}-\d{2}-\d{2}$/.test(analysis.date)) s.date = `${analysis.date}T12:00:00.000Z`;
                 s.status = 'ready';
                 s.error = null;
@@ -666,7 +667,10 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
         const dossier = readDossier(req.params.id);
         const source = dossier && findSource(dossier, req.params.sourceId);
         if (!source?.file) return res.status(404).json({ error: 'Fichier introuvable' });
-        res.download(path.join(FILES_DIR, path.basename(req.params.id), source.file.stored), source.file.name);
+        const filePath = path.join(FILES_DIR, path.basename(req.params.id), source.file.stored);
+        // ?inline=1 displays the file in the page (image preview) instead of downloading it
+        if (req.query.inline) return res.type(source.file.mimetype).sendFile(filePath);
+        res.download(filePath, source.file.name);
     });
 
     app.post('/api/dossiers/:id/fiche', (req, res) => {

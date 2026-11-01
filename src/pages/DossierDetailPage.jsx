@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import classNames from 'classnames';
 import {
     ArrowLeft, RefreshCw, Download, Trash2, Upload, Loader2, AlertTriangle, ChevronDown, Send, Copy, ExternalLink,
-    Mail, MessagesSquare, Bug, FileText, Sheet, Globe, Image as ImageIcon, StickyNote, Sparkles, RotateCw, Paperclip
+    Mail, MessagesSquare, Bug, FileText, Sheet, Globe, Image as ImageIcon, StickyNote, Sparkles, RotateCw, Paperclip, X
 } from 'lucide-react';
 import { ETATS, SOURCE_TYPES, formatDate } from '../utils/dossierDisplay';
 import styles from './DossierDetailPage.module.css';
@@ -45,6 +45,7 @@ const DossierDetailPage = () => {
     const [dragOver, setDragOver] = useState(false);
     const [expanded, setExpanded] = useState(null);
     const [fullTexts, setFullTexts] = useState({});
+    const [lightbox, setLightbox] = useState(null);
     const [chatInput, setChatInput] = useState('');
     const [chatPending, setChatPending] = useState(false);
     const [chatError, setChatError] = useState(null);
@@ -70,6 +71,13 @@ const DossierDetailPage = () => {
         const timer = setInterval(load, 2000);
         return () => clearInterval(timer);
     }, [busy, load]);
+
+    useEffect(() => {
+        if (!lightbox) return;
+        const onKey = (e) => e.key === 'Escape' && setLightbox(null);
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [lightbox]);
 
     useEffect(() => {
         if (tab === 'chat') chatEndRef.current?.scrollIntoView({ block: 'end' });
@@ -467,6 +475,7 @@ const DossierDetailPage = () => {
                             const Icon = TYPE_ICONS[s.type] || FileText;
                             const a = s.analysis;
                             const open = expanded === s.id;
+                            const imageUrl = s.file?.mimetype?.startsWith('image/') ? `/api/dossiers/${id}/sources/${s.id}/file?inline=1` : null;
                             return (
                                 <li key={s.id} id={`source-${s.id}`} className={classNames(styles.source, { [styles.sourceOpen]: open })}>
                                     <button type="button" className={styles.sourceHead} onClick={() => setExpanded(open ? null : s.id)}>
@@ -478,6 +487,11 @@ const DossierDetailPage = () => {
                                         <span className={styles.sourceDate}>{formatDate(s.date || s.createdAt)}</span>
                                         <ChevronDown size={14} className={classNames(styles.chevron, { [styles.chevronOpen]: open })} />
                                     </button>
+                                    {imageUrl && (
+                                        <button type="button" className={classNames(styles.thumb, { [styles.thumbLarge]: open })} onClick={() => setLightbox({ url: imageUrl, title: s.title })} title="Agrandir">
+                                            <img src={imageUrl} alt={s.title} loading="lazy" />
+                                        </button>
+                                    )}
                                     {!open && a?.resume && <p className={styles.sourceResume}>{a.resume}</p>}
                                     {s.mantis && <div className={styles.mantisState}>{s.mantis.etat}{s.mantis.priorite && ` · ${s.mantis.priorite}`}{s.mantis.affecte && ` · ${s.mantis.affecte}`}</div>}
                                     {s.status === 'error' && (
@@ -522,6 +536,17 @@ const DossierDetailPage = () => {
                     </ul>
                 </div>
             </div>
+
+            {lightbox && (
+                <div className={styles.lightbox} onClick={() => setLightbox(null)}>
+                    <img src={lightbox.url} alt={lightbox.title} onClick={e => e.stopPropagation()} />
+                    <div className={styles.lightboxBar} onClick={e => e.stopPropagation()}>
+                        <span>{lightbox.title}</span>
+                        <a href={lightbox.url} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} /> Nouvel onglet</a>
+                        <button type="button" onClick={() => setLightbox(null)} title="Fermer (Échap)"><X size={16} /></button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
