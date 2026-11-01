@@ -246,7 +246,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                 };
             }
             return {
-                header: key === 'Mis à jour' ? 'Mise à jour' : key === 'État' ? 'Etat' : key,
+                header: { 'Mis à jour': 'Mise à jour', 'État': 'Etat', 'Domaine (Toray)': 'Domaine' }[key] || key,
                 accessorKey: key,
                 id: key
             };

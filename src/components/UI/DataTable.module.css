@@ -110,26 +110,15 @@
 }
 
 .headerContent {
+    cursor: grab;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
 }
 
-.dragHandle {
-    cursor: grab;
-    color: var(--text-dim);
-    font-size: 1rem;
-    padding: 4px;
-    border-radius: 4px;
-}
-
-.dragHandle:hover {
-    color: var(--text-secondary);
-    background: rgba(var(--fg-rgb), 0.05);
-}
-
 .sortableLabel {
+    cursor: pointer;
     flex: 1;
     display: flex;
     justify-content: space-between;

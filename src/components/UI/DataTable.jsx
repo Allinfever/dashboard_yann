@@ -116,14 +116,8 @@ const SortableHeader = ({ header, table }) => {
             className={styles.th}
             colSpan={header.colSpan}
         >
-            <div className={styles.headerContent}>
-                <div
-                    className={styles.dragHandle}
-                    {...attributes}
-                    {...listeners}
-                >
-                    ⠿
-                </div>
+            {/* The whole header is the drag handle: a click sorts, a drag of 8px+ reorders */}
+            <div className={styles.headerContent} {...attributes} {...listeners}>
                 <div
                     onClick={header.column.getToggleSortingHandler()}
                     className={styles.sortableLabel}
