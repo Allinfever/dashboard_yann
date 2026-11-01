@@ -10,14 +10,9 @@ export const navConfig = [
     label: 'Mantis Recette',
     icon: '🐞',
     tabs: [
-      { id: 'synthese-copro', label: 'Synthèse CoPro' },
       { id: 'all-mantis', label: 'All Mantis' },
       { id: 'sd-en-cours', label: 'SD en cours' },
-      { id: 'sd-testable', label: 'SD Testable' },
-      { id: 'minutes-created', label: 'Minutes - Created' },
-      { id: 'minutes-tested', label: 'Minutes - Tested' },
-      { id: 'mantis-rdd', label: 'Mantis RDD' }
-
+      { id: 'sd-testable', label: 'SD Testable' }
     ]
   },
   {
