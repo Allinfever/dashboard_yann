@@ -882,36 +882,67 @@ app.post('/api/mantis/refresh', async (req, res) => {
 
 
             refreshJob.total = rows.length;
-            const concurrency = parseInt(process.env.MANTIS_ENRICH_CONCURRENCY || '5');
+            const concurrency = parseInt(process.env.MANTIS_ENRICH_CONCURRENCY || '8');
 
-            for (let i = 0; i < rows.length; i += concurrency) {
-                const chunk = rows.slice(i, i + concurrency);
-                await Promise.all(chunk.map(async (row) => {
-                    const idAttr = row['Identifiant'] || row['id'];
-                    if (idAttr) {
-                        const numericId = idAttr.replace(/^0+/, '');
-                        try {
-                            const val = await fetchPriority(mantis, numericId);
-                            row['priorite_p'] = val;
-                            if (val && val !== 'ERR') refreshJob.success++;
-                            else refreshJob.failed++;
-                        } catch (err) {
-                            row['priorite_p'] = 'ERR';
-                            refreshJob.failed++;
-                        }
-                    } else {
-                        refreshJob.success++;
-                    }
-                    refreshJob.current++;
-                    refreshJob.lastUpdate = new Date().toISOString();
-                }));
+            // Incremental sync: reuse the priority of tickets untouched since the previous sync.
+            // "Mis à jour" has no time, so tickets updated on (or after) the previous sync day are re-read.
+            const previous = readCache(source);
+            const previousSyncDay = previous && previous.lastUpdated ? previous.lastUpdated.slice(0, 10) : null;
+            const previousRows = new Map();
+            if (previousSyncDay && Array.isArray(previous.data)) {
+                previous.data.forEach(row => previousRows.set(row['Identifiant'] || row['id'], row));
             }
+            const reusablePriority = (row) => {
+                const prev = previousRows.get(row['Identifiant'] || row['id']);
+                const updated = row['Mis à jour'] || '';
+                if (!prev || prev['priorite_p'] === undefined || prev['priorite_p'] === 'ERR') return undefined;
+                if (!updated || updated !== prev['Mis à jour'] || updated >= previousSyncDay) return undefined;
+                return prev['priorite_p'];
+            };
+            let reused = 0;
+
+            const enrichRow = async (row) => {
+                const idAttr = row['Identifiant'] || row['id'];
+                const known = reusablePriority(row);
+                if (known !== undefined) {
+                    row['priorite_p'] = known;
+                    reused++;
+                    if (known) refreshJob.success++;
+                    else refreshJob.failed++;
+                } else if (idAttr) {
+                    const numericId = idAttr.replace(/^0+/, '');
+                    // New or modified ticket: bypass the in-memory cache to read the current value
+                    priorityCache.delete(numericId);
+                    try {
+                        const val = await fetchPriority(mantis, numericId);
+                        row['priorite_p'] = val;
+                        if (val && val !== 'ERR') refreshJob.success++;
+                        else refreshJob.failed++;
+                    } catch (err) {
+                        row['priorite_p'] = 'ERR';
+                        refreshJob.failed++;
+                    }
+                } else {
+                    refreshJob.success++;
+                }
+                refreshJob.current++;
+                refreshJob.lastUpdate = new Date().toISOString();
+            };
+
+            // Worker pool: a slow ticket no longer holds back a whole batch
+            let nextIndex = 0;
+            const worker = async () => {
+                while (nextIndex < rows.length) {
+                    await enrichRow(rows[nextIndex++]);
+                }
+            };
+            await Promise.all(Array.from({ length: Math.max(1, concurrency) }, worker));
 
             writeCacheAtomic(rows, {
                 totalRows: refreshJob.total,
-                enriched: { total: refreshJob.current, success: refreshJob.success, failed: refreshJob.failed }
+                enriched: { total: refreshJob.current, success: refreshJob.success, failed: refreshJob.failed, reused }
             }, source);
-            console.log(`[Job:${source}] Finished in ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
+            console.log(`[Job:${source}] Finished in ${((Date.now() - startTime) / 1000).toFixed(1)}s (${reused}/${rows.length} priorities reused)`);
 
         } catch (e) {
             console.error(`[Job:${source}] Failed:`, e.message);
