@@ -220,6 +220,16 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
     // --- Text extraction ---
     const decodeName = (name) => Buffer.from(name, 'latin1').toString('utf8');
 
+    // The data directory lives under ~/.dashboard-yann: send() ignores dotfile paths unless told otherwise
+    const SEND_OPTIONS = { dotfiles: 'allow' };
+
+    const MIME_BY_EXT = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.bmp': 'image/bmp', '.pdf': 'application/pdf', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+    const MIN_IMAGE_BYTES = 4096; // smaller images are signature logos and spacers
+    const AI_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+
+    // Email attachments and inline images, without the tiny decoration images
+    const keepAttachment = (a) => a.buffer?.length && !(a.mimetype.startsWith('image/') && a.buffer.length < MIN_IMAGE_BYTES);
+
     const extractFromFile = async (filePath, originalName, mimetype) => {
         const ext = path.extname(originalName).toLowerCase();
         const buffer = fs.readFileSync(filePath);
@@ -239,19 +249,36 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
                     `Objet : ${mail.subject || ''}`,
                     '',
                     mail.text || (mail.html ? cheerio.load(mail.html).text() : '')
-                ].filter(l => l !== null).join('\n')
+                ].filter(l => l !== null).join('\n'),
+                attachments: (mail.attachments || []).map((a, i) => ({
+                    name: a.filename || `piece-jointe-${i + 1}`,
+                    mimetype: a.contentType || 'application/octet-stream',
+                    buffer: a.content
+                })).filter(keepAttachment)
             };
         }
         if (ext === '.msg') {
             const MsgReader = require('@kenjiuno/msgreader').default;
-            const msg = new MsgReader(buffer).getFileData();
+            const reader = new MsgReader(buffer);
+            const msg = reader.getFileData();
+            const attachments = (msg.attachments || []).flatMap((att, i) => {
+                try {
+                    const data = reader.getAttachment(att);
+                    const name = data.fileName || att.fileName || `piece-jointe-${i + 1}${att.extension || ''}`;
+                    const mimetype = att.attachMimeTag || MIME_BY_EXT[path.extname(name).toLowerCase()] || 'application/octet-stream';
+                    return [{ name, mimetype, buffer: Buffer.from(data.content) }];
+                } catch {
+                    return []; // embedded messages and unreadable parts
+                }
+            }).filter(keepAttachment);
             const to = (msg.recipients || []).map(r => r.name || r.email).join(', ');
             const date = msg.messageDeliveryTime || msg.clientSubmitTime || msg.creationTime;
             return {
                 type: 'email',
                 title: msg.subject || originalName,
                 date: date ? new Date(date).toISOString() : null,
-                text: [`De : ${msg.senderName || ''} <${msg.senderEmail || ''}>`, `À : ${to}`, `Date : ${date || ''}`, `Objet : ${msg.subject || ''}`, '', msg.body || ''].join('\n')
+                text: [`De : ${msg.senderName || ''} <${msg.senderEmail || ''}>`, `À : ${to}`, `Date : ${date || ''}`, `Objet : ${msg.subject || ''}`, '', msg.body || ''].join('\n'),
+                attachments
             };
         }
         if (ext === '.docx') {
@@ -307,12 +334,12 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
     };
 
     // --- AI: per-source analysis ---
-    const analyzeSource = async (source, image) => {
+    const analyzeSource = async (source, images) => {
         const content = [{
             type: 'input_text',
             text: `Type présumé : ${source.type}\nNom : ${source.title}\n\nContenu :\n${(source.text || '').slice(0, SOURCE_TEXT_LIMIT)}`
         }];
-        if (image) content.push({ type: 'input_image', image_url: image });
+        images.forEach(url => content.push({ type: 'input_image', image_url: url }));
         return structuredCall({
             model: MODEL_FAST,
             name: 'analyse_source',
@@ -412,7 +439,7 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
         const source = dossier && findSource(dossier, sourceId);
         if (!source) return;
         try {
-            const extracted = { type: source.type, title: source.title, text: source.text, date: source.date, image: null };
+            const extracted = { type: source.type, title: source.title, text: source.text, date: source.date, image: null, attachments: [] };
             if (source.kind === 'file') {
                 Object.assign(extracted, await extractFromFile(path.join(FILES_DIR, dossierId, source.file.stored), source.file.name, source.file.mimetype));
             } else if (source.kind === 'url') {
@@ -422,12 +449,25 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
                 const snap = mantisSnapshot(source.mantisId);
                 if (snap?.resume) extracted.title = `Mantis #${source.mantisId} — ${snap.resume}`;
             }
+            const dir = path.join(FILES_DIR, path.basename(dossierId));
+            (source.attachments || []).forEach(a => fs.rmSync(path.join(dir, a.stored), { force: true }));
+            const attachments = extracted.attachments.map((a, i) => {
+                const stored = `${Date.now()}-${i}-${uuidv4().slice(0, 8)}${path.extname(a.name).toLowerCase()}`;
+                fs.writeFileSync(path.join(dir, stored), a.buffer);
+                return { name: a.name, stored, mimetype: a.mimetype, size: a.buffer.length };
+            });
             mutate(dossierId, d => {
                 const s = findSource(d, sourceId);
-                if (s) Object.assign(s, { type: extracted.type, title: extracted.title, text: extracted.text, date: extracted.date || s.date });
+                if (s) Object.assign(s, { type: extracted.type, title: extracted.title, text: extracted.text, date: extracted.date || s.date, attachments });
             });
 
-            const analysis = await analyzeSource({ ...source, ...extracted }, extracted.image);
+            // The largest images of an email (screenshots) are shown to the model too
+            const images = extracted.image ? [extracted.image] : extracted.attachments
+                .filter(a => AI_IMAGE_TYPES.includes(a.mimetype))
+                .sort((a, b) => b.buffer.length - a.buffer.length)
+                .slice(0, 4)
+                .map(a => `data:${a.mimetype};base64,${a.buffer.toString('base64')}`);
+            const analysis = await analyzeSource({ ...source, ...extracted }, images);
             mutate(dossierId, d => {
                 const s = findSource(d, sourceId);
                 if (!s) return;
@@ -658,7 +698,8 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
             d.sources = d.sources.filter(s => s.id !== req.params.sourceId);
         });
         if (!removed) return res.status(404).json({ error: 'Source introuvable' });
-        if (removed.file) fs.rmSync(path.join(FILES_DIR, path.basename(req.params.id), removed.file.stored), { force: true });
+        const dir = path.join(FILES_DIR, path.basename(req.params.id));
+        [removed.file, ...(removed.attachments || [])].filter(Boolean).forEach(f => fs.rmSync(path.join(dir, f.stored), { force: true }));
         scheduleFiche(req.params.id);
         res.json({ ok: true });
     });
@@ -669,8 +710,17 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
         if (!source?.file) return res.status(404).json({ error: 'Fichier introuvable' });
         const filePath = path.join(FILES_DIR, path.basename(req.params.id), source.file.stored);
         // ?inline=1 displays the file in the page (image preview) instead of downloading it
-        if (req.query.inline) return res.type(source.file.mimetype).sendFile(filePath);
-        res.download(filePath, source.file.name);
+        if (req.query.inline) return res.type(source.file.mimetype).sendFile(filePath, SEND_OPTIONS);
+        res.download(filePath, source.file.name, SEND_OPTIONS);
+    });
+
+    app.get('/api/dossiers/:id/sources/:sourceId/attachments/:index', (req, res) => {
+        const dossier = readDossier(req.params.id);
+        const attachment = dossier && findSource(dossier, req.params.sourceId)?.attachments?.[Number(req.params.index)];
+        if (!attachment) return res.status(404).json({ error: 'Pièce jointe introuvable' });
+        const filePath = path.join(FILES_DIR, path.basename(req.params.id), attachment.stored);
+        if (req.query.inline) return res.type(attachment.mimetype).sendFile(filePath, SEND_OPTIONS);
+        res.download(filePath, attachment.name, SEND_OPTIONS);
     });
 
     app.post('/api/dossiers/:id/fiche', (req, res) => {

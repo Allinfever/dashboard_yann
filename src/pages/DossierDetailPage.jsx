@@ -478,6 +478,11 @@ const DossierDetailPage = () => {
                             const fileUrl = s.file ? `/api/dossiers/${id}/sources/${s.id}/file` : null;
                             const isMailFile = /\.(eml|msg)$/i.test(s.file?.name || '');
                             const imageUrl = s.file?.mimetype?.startsWith('image/') ? `/api/dossiers/${id}/sources/${s.id}/file?inline=1` : null;
+                            const attachmentUrl = (i) => `/api/dossiers/${id}/sources/${s.id}/attachments/${i}`;
+                            const attachments = (s.attachments || []).map((att, i) => ({ ...att, url: attachmentUrl(i), isImage: att.mimetype.startsWith('image/') }));
+                            const attachedImages = attachments.filter(att => att.isImage);
+                            const otherAttachments = attachments.filter(att => !att.isImage);
+                            const shownImages = open ? attachedImages : attachedImages.slice(0, 4);
                             return (
                                 <li key={s.id} id={`source-${s.id}`} className={classNames(styles.source, { [styles.sourceOpen]: open })}>
                                     <div className={styles.sourceRow}>
@@ -500,6 +505,18 @@ const DossierDetailPage = () => {
                                         <button type="button" className={classNames(styles.thumb, { [styles.thumbLarge]: open })} onClick={() => setLightbox({ url: imageUrl, title: s.title })} title="Agrandir">
                                             <img src={imageUrl} alt={s.title} loading="lazy" />
                                         </button>
+                                    )}
+                                    {shownImages.length > 0 && (
+                                        <div className={styles.thumbRow}>
+                                            {shownImages.map(img => (
+                                                <button key={img.stored} type="button" className={classNames(styles.thumbSmall, { [styles.thumbSmallLarge]: open })} onClick={() => setLightbox({ url: `${img.url}?inline=1`, title: img.name })} title={img.name}>
+                                                    <img src={`${img.url}?inline=1`} alt={img.name} loading="lazy" />
+                                                </button>
+                                            ))}
+                                            {!open && attachedImages.length > shownImages.length && (
+                                                <button type="button" className={styles.moreThumbs} onClick={() => setExpanded(s.id)}>+{attachedImages.length - shownImages.length}</button>
+                                            )}
+                                        </div>
                                     )}
                                     {!open && a?.resume && <p className={styles.sourceResume}>{a.resume}</p>}
                                     {s.mantis && <div className={styles.mantisState}>{s.mantis.etat}{s.mantis.priorite && ` · ${s.mantis.priorite}`}{s.mantis.affecte && ` · ${s.mantis.affecte}`}</div>}
@@ -532,6 +549,12 @@ const DossierDetailPage = () => {
                                             <div className={styles.sourceActions}>
                                                 {s.textLength > 0 && <button type="button" className={styles.ghostBtn} onClick={() => toggleFullText(s.id)}><FileText size={13} /> {fullTexts[s.id] !== undefined ? 'Masquer le texte' : 'Texte'}</button>}
                                                 {s.file && <a className={styles.ghostBtn} href={fileUrl}><Download size={13} /> {s.file.name}</a>}
+                                                {otherAttachments.map(att => (
+                                                    <a key={att.stored} className={styles.ghostBtn} href={att.url} title={`Pièce jointe : ${att.name}`}><Paperclip size={13} /> {att.name}</a>
+                                                ))}
+                                                {s.kind !== 'text' && s.status !== 'processing' && (
+                                                    <button type="button" className={styles.ghostBtn} onClick={() => sourceAction(s.id, 'POST', '/retry')} title="Relire la source et relancer l'analyse IA"><RotateCw size={13} /> Réanalyser</button>
+                                                )}
                                                 {s.url && <a className={styles.ghostBtn} href={s.url} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /> Ouvrir</a>}
                                                 {s.mantisId && mantisLink(s.mantisId) && <a className={styles.ghostBtn} href={mantisLink(s.mantisId)} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /> Mantis</a>}
                                                 <button type="button" className={classNames(styles.ghostBtn, styles.dangerText)} onClick={() => deleteSource(s)}><Trash2 size={13} /> Retirer</button>

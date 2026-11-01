@@ -928,3 +928,52 @@
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
+
+/* Images found in an email */
+.thumbRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.45rem 0 0 2.1rem;
+}
+
+.thumbSmall {
+    padding: 0;
+    background: rgba(var(--well-rgb), 0.25);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: zoom-in;
+}
+
+.thumbSmall:hover {
+    border-color: var(--color-primary);
+}
+
+.thumbSmall:active {
+    transform: none;
+}
+
+.thumbSmall img {
+    display: block;
+    height: 56px;
+    max-width: 110px;
+    object-fit: cover;
+}
+
+.thumbSmallLarge img {
+    height: 120px;
+    max-width: 220px;
+    object-fit: contain;
+}
+
+.moreThumbs {
+    height: 56px;
+    padding: 0 0.6rem;
+    background: rgba(var(--fg-rgb), 0.05);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
