@@ -32,6 +32,24 @@ const COLUMN_BLACKLIST = [
     'Projet'
 ];
 
+// --- Helper: accent and case insensitive text ---
+const normalizeText = (val) => (val ?? '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// --- Helper: every searched word must appear somewhere in the row ---
+// IDs are also searchable without their leading zeros ("17259" finds "0017259")
+const matchesSearch = (row, words) => {
+    const text = Object.values(row)
+        .map(v => {
+            const s = normalizeText(v);
+            return /^0+\d+$/.test(s) ? `${s} ${s.replace(/^0+/, '')}` : s;
+        })
+        .join(' | ');
+    return words.every(word => text.includes(word));
+};
+
+const columnFilterFn = (row, columnId, value) =>
+    normalizeText(row.getValue(columnId)).includes(normalizeText(value).trim());
+
 // --- Helper: Check if column is empty across all rows ---
 const isColumnEmpty = (rows, key) => {
     if (!rows || rows.length === 0) return true;
@@ -160,12 +178,17 @@ const DataTable = ({
         localStorage.setItem(storageKey, JSON.stringify(columnOrder));
     }, [columnOrder, storageKey]);
 
+    const searchedData = useMemo(() => {
+        const words = normalizeText(globalFilter).split(/\s+/).filter(Boolean);
+        return words.length === 0 ? data : data.filter(row => matchesSearch(row, words));
+    }, [data, globalFilter]);
+
     const table = useReactTable({
-        data,
+        data: searchedData,
         columns,
+        defaultColumn: { filterFn: columnFilterFn },
         state: {
             sorting,
-            globalFilter,
             columnFilters,
             columnOrder,
         },
@@ -175,7 +198,6 @@ const DataTable = ({
             },
         },
         onSortingChange: setSorting,
-        onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         onColumnOrderChange: setColumnOrder,
         getCoreRowModel: getCoreRowModel(),
@@ -281,9 +303,18 @@ const DataTable = ({
                     <input
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(e.target.value)}
-                        placeholder="Recherche globale..."
+                        placeholder="Rechercher (mots, n° de ticket...)"
                         className={styles.searchInput}
                     />
+                    {(globalFilter || columnFilters.length > 0) && (
+                        <button
+                            onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
+                            className={styles.resetBtn}
+                            title="Vider la recherche et les filtres de colonnes"
+                        >
+                            Effacer la recherche
+                        </button>
+                    )}
                 </div>
                 <div className={styles.controlsRight}>
                     <button

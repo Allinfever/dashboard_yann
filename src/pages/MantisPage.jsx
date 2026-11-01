@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DataTable from '../components/UI/DataTable';
 import CoproSummary from '../components/Mantis/CoproSummary';
+import MantisFilters from '../components/Mantis/MantisFilters';
+import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
 import styles from './MantisPage.module.css';
 
@@ -26,6 +28,9 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
 
     // Diagnostic info
     const [diag, setDiag] = useState({ status: null, body: null });
+
+    // User filters, remembered per page
+    const [userFilters, setUserFilters] = useMantisFilters(`mantis_filters_${source}`);
 
     useEffect(() => {
         const isMantisTab = mantisTabsConfig.some(t => t.tabId === currentTab);
@@ -142,6 +147,11 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
         return data;
     }, [data, currentTabConfig]);
 
+    const displayedData = useMemo(
+        () => applyMantisFilters(filteredData, userFilters),
+        [filteredData, userFilters]
+    );
+
 
     const columns = useMemo(() => {
         if (data.length === 0) return [];
@@ -211,8 +221,8 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
                         <span style={{ color: isCached ? 'var(--color-amber)' : 'var(--color-emerald)' }}>
                             ● Source: {isCached ? 'Cache' : 'Fresh'}
                         </span>
-                        <span title="Lignes dans cet onglet / Total en cache">
-                            ● Nb lignes: {filteredData.length} / {data.length}
+                        <span title="Lignes affichées / Lignes de l'onglet / Total en cache">
+                            ● Nb lignes: {displayedData.length} / {filteredData.length} / {data.length}
                         </span>
 
                         {lastUpdate && (
@@ -260,11 +270,20 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
                 </div>
             )}
 
+            {currentTab !== 'synthese-copro' && filteredData.length > 0 && (
+                <MantisFilters
+                    data={filteredData}
+                    filters={userFilters}
+                    onChange={setUserFilters}
+                    resultCount={displayedData.length}
+                />
+            )}
+
             {currentTab === 'synthese-copro' ? (
                 <CoproSummary data={data} loading={loading} />
-            ) : filteredData.length > 0 ? (
+            ) : displayedData.length > 0 ? (
                 <div>
-                    <DataTable data={filteredData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />
+                    <DataTable data={displayedData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />
                     {currentTabConfig.rulesText && (
                         <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
                             <strong style={{ color: '#fff' }}>Règles de sélection :</strong>
@@ -275,7 +294,9 @@ const MantisPage = ({ source = 'recette', title = 'Mantis', deriveDomainFromSumm
             ) : (
                 !loading && (
                     <div className="card" style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-dim)', borderStyle: 'dashed' }}>
-                        Aucune donnée correspondant aux critères.
+                        {filteredData.length > 0
+                            ? 'Aucun ticket ne correspond aux filtres sélectionnés.'
+                            : 'Aucune donnée correspondant aux critères.'}
                     </div>
                 )
             )}

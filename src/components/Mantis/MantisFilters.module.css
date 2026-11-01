@@ -1,0 +1,279 @@
+.bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-right: 0.5rem;
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+}
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.trigger:hover,
+.triggerOpen {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.triggerActive {
+    color: #fff;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.badge {
+    min-width: 18px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    line-height: 18px;
+    text-align: center;
+    color: #fff;
+    background: var(--color-primary);
+    border-radius: 9px;
+}
+
+.caret {
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+.panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 50;
+    width: 280px;
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem;
+    background: #141725;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.panelRight {
+    left: auto;
+    right: 0;
+}
+
+.panelSearch {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.82rem;
+    color: var(--text-main);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.panelSearch:focus {
+    border-color: var(--color-primary);
+}
+
+.panelActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.panelActions button {
+    padding: 0.2rem 0;
+    font-size: 0.75rem;
+    color: var(--color-cyan);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.panelActions button:disabled {
+    color: var(--text-dim);
+    cursor: default;
+}
+
+.optionList {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.4rem;
+    font-size: 0.84rem;
+    color: var(--text-main);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.option input {
+    accent-color: var(--color-primary);
+}
+
+.optionMuted {
+    color: var(--text-dim);
+}
+
+.optionLabel {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.optionCount {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.noOption {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+/* Date filter */
+.presetList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 0.75rem;
+}
+
+.preset {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.84rem;
+    text-align: left;
+    color: var(--text-main);
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.preset:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.presetActive {
+    color: #fff;
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.dateInputs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dateInputs label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.dateInputs input {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-main);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color-scheme: dark;
+}
+
+/* Active filters */
+.resultCount {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-right: 0.5rem;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.5rem 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    color: #dbeafe;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.chip:hover {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: rgba(244, 63, 94, 0.4);
+}
+
+.chipClose {
+    font-size: 0.95rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.clearAll {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--color-rose);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.clearAll:hover {
+    text-decoration: underline;
+}
