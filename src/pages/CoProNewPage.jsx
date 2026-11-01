@@ -257,7 +257,7 @@ const CoProNewPage = () => {
         <div className="mantis-container">
             <div className={mantisStyles.pageHeader}>
                 <div>
-                    <h2>CoPro New</h2>
+                    <h2>CoPro</h2>
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.7 }}>
                         <span style={{ color: isCached ? 'var(--color-amber)' : 'var(--color-emerald)' }}>
                             ● Source: {isCached ? 'Cache' : 'Fresh'}

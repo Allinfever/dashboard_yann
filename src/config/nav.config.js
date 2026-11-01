@@ -1,22 +1,13 @@
+// Les entrées avec `group` sont rangées sous l'en-tête correspondant de la sidebar
+export const navGroups = [
+  { id: 'autres', label: 'Autres', icon: '🗂️' }
+];
+
 export const navConfig = [
-  {
-    id: 'pilotage',
-    path: '/pilotage',
-    label: 'Pilotage',
-    icon: '📊',
-    tabs: []
-  },
-  {
-    id: 'roadmap',
-    path: '/roadmap',
-    label: 'Roadmap',
-    icon: '🗓️',
-    tabs: []
-  },
   {
     id: 'mantis',
     path: '/mantis',
-    label: 'Mantis',
+    label: 'Mantis Recette',
     icon: '🐞',
     tabs: [
       { id: 'synthese-copro', label: 'Synthèse CoPro' },
@@ -32,14 +23,31 @@ export const navConfig = [
   {
     id: 'copro-new',
     path: '/copro-new',
-    label: 'CoPro New',
+    label: 'CoPro',
     icon: '🆕',
+    tabs: []
+  },
+  {
+    id: 'pilotage',
+    path: '/pilotage',
+    label: 'Pilotage',
+    group: 'autres',
+    icon: '📊',
+    tabs: []
+  },
+  {
+    id: 'roadmap',
+    path: '/roadmap',
+    label: 'Roadmap',
+    group: 'autres',
+    icon: '🗓️',
     tabs: []
   },
   {
     id: 'sujets-ouverts',
     path: '/open-topics',
     label: 'Sujets Ouverts',
+    group: 'autres',
     icon: '📂',
     tabs: []
   },
@@ -47,6 +55,7 @@ export const navConfig = [
     id: 'documentation',
     path: '/documentation',
     label: 'Documentation',
+    group: 'autres',
     icon: '📚',
     tabs: [
       { id: 'general', label: 'Général' },
@@ -58,8 +67,8 @@ export const navConfig = [
     id: 'mantis-extractor',
     path: '/mantis-extractor',
     label: 'Mantis & Notes Extractor',
+    group: 'autres',
     icon: '📥',
     tabs: []
   }
 ];
-

@@ -9,7 +9,7 @@ const TopTabs = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Find the current active section config based on the path
-    const currentSection = navConfig.find(item => location.pathname.startsWith(item.path));
+    const currentSection = navConfig.find(item => location.pathname === item.path || location.pathname.startsWith(`${item.path}/`));
     const currentTabId = searchParams.get('tab');
 
     // If no section found or no tabs for this section, render nothing

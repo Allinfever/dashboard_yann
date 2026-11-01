@@ -95,3 +95,44 @@
   color: var(--color-primary);
   filter: drop-shadow(0 0 5px var(--color-primary-glow));
 }
+.groupToggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.groupToggle:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.groupActive {
+  color: var(--text-main);
+}
+
+.chevron {
+  margin-left: auto;
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.groupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  margin-left: 1.5rem;
+}
+
+.nested {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
