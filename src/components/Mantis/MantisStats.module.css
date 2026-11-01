@@ -24,14 +24,14 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
     border-radius: 999px;
     cursor: pointer;
 }
 
 .switch[aria-checked='true'] {
-    color: #fff;
+    color: var(--text-strong);
     border-color: rgba(59, 130, 246, 0.5);
     background: rgba(59, 130, 246, 0.12);
 }
@@ -40,7 +40,7 @@
     position: relative;
     width: 28px;
     height: 16px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(var(--fg-rgb), 0.15);
     border-radius: 999px;
     transition: background 0.15s;
 }
@@ -75,8 +75,8 @@
     flex-direction: column;
     gap: 0.2rem;
     padding: 1rem 1.1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-md);
 }
 
@@ -91,7 +91,7 @@
 .kpiValue {
     font-size: 1.8rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-strong);
     font-variant-numeric: tabular-nums;
 }
 
@@ -108,8 +108,8 @@
 
 .card {
     padding: 1.25rem 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.02);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-md);
     min-width: 0;
 }
@@ -172,7 +172,7 @@
 .heatmap td {
     padding: 0.4rem 0.3rem;
     text-align: center;
-    color: #fff;
+    color: var(--text-strong);
     border-radius: 4px;
 }
 
@@ -201,7 +201,7 @@
     padding: 4rem;
     text-align: center;
     color: var(--text-dim);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border: 1px dashed rgba(var(--fg-rgb), 0.1);
     border-radius: var(--border-radius-md);
 }
 

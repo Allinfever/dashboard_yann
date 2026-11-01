@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { navConfig, navGroups } from '../../config/nav.config';
 import styles from './Sidebar.module.css';
@@ -58,6 +58,32 @@ const NavGroup = ({ group, items }) => {
     );
 };
 
+const ThemeToggle = () => {
+    const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark');
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        try {
+            localStorage.setItem('theme', theme);
+        } catch {
+            // Storage unavailable: the theme simply isn't remembered
+        }
+    }, [theme]);
+
+    const isLight = theme === 'light';
+    return (
+        <button
+            type="button"
+            className={classNames(styles.navLink, styles.themeToggle)}
+            onClick={() => setTheme(isLight ? 'dark' : 'light')}
+            title={isLight ? 'Passer en mode sombre' : 'Passer en mode clair'}
+        >
+            <span className={styles.icon}>{isLight ? '🌙' : '☀️'}</span>
+            {isLight ? 'Mode sombre' : 'Mode clair'}
+        </button>
+    );
+};
+
 const Sidebar = () => {
     const topLevel = navConfig.filter(item => !item.group);
 
@@ -73,6 +99,9 @@ const Sidebar = () => {
                     return items.length > 0 && <NavGroup key={group.id} group={group} items={items} />;
                 })}
             </nav>
+            <div className={styles.footer}>
+                <ThemeToggle />
+            </div>
         </aside>
     );
 };

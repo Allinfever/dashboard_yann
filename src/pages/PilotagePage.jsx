@@ -29,14 +29,14 @@ const DOMAIN_COLORS = [
 
 const CHART_TOOLTIP_STYLE = {
     contentStyle: {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        border: '1px solid #334155',
+        backgroundColor: 'var(--surface-popover)',
+        border: '1px solid rgba(var(--fg-rgb), 0.15)',
         borderRadius: '8px',
         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
         padding: '10px'
     },
     itemStyle: {
-        color: '#f8fafc',
+        color: 'var(--text-main)',
         fontSize: '12px',
         fontWeight: 500
     },
@@ -250,7 +250,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                     </div>
                     <div className={styles.kpiCard}>
                         <div className={styles.kpiLabel}>Âge Moyen <span style={{ fontSize: '0.6rem', opacity: 0.6 }}> (HORS RDD)</span></div>
-                        <div className={styles.kpiValue} style={{ color: global.backlog.age_moyen > 30 ? PRIORITY_COLORS.p1 : '#fff' }}>
+                        <div className={styles.kpiValue} style={{ color: global.backlog.age_moyen > 30 ? PRIORITY_COLORS.p1 : 'var(--text-strong)' }}>
                             {global.backlog.age_moyen} <span style={{ fontSize: '1rem', fontWeight: 500 }}>jours</span>
                         </div>
                         <div className={styles.kpiSubValue}><Clock size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Temps d'ouverture</div>
@@ -276,7 +276,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                     <div className={styles.chartCard}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h4 className={styles.chartTitle} style={{ marginBottom: 0 }}>Évolution des créations (12 mois)</h4>
-                            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px' }}>
+                            <div style={{ display: 'flex', background: 'rgba(var(--fg-rgb),0.05)', borderRadius: '8px', padding: '2px' }}>
                                 <button
                                     onClick={() => setEvolutionMode('weekly')}
                                     style={{
@@ -345,7 +345,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                                 </PieChart>
                             </ResponsiveContainer>
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>{global.domaines.reduce((acc, d) => acc + d.value, 0)}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-strong)' }}>{global.domaines.reduce((acc, d) => acc + d.value, 0)}</div>
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total</div>
                             </div>
                         </div>
@@ -354,7 +354,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                                 <div key={i} style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: DOMAIN_COLORS[i % DOMAIN_COLORS.length] }}></div>
                                     <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{d.name}</span>
-                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto' }}>{d.value}</span>
+                                    <span style={{ fontWeight: 700, color: 'var(--text-strong)', marginLeft: 'auto' }}>{d.value}</span>
                                 </div>
                             ))}
                         </div>
@@ -413,7 +413,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                                 </PieChart>
                             </ResponsiveContainer>
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-strong)' }}>
                                     {global.open_by_domain.reduce((acc, d) => acc + d.value, 0)}
                                 </div>
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Ouvertes</div>
@@ -427,7 +427,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                                     <div key={i} style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: DOMAIN_COLORS[i % DOMAIN_COLORS.length] }}></div>
                                         <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto' }}>{d.value} <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>({percent}%)</span></span>
+                                        <span style={{ fontWeight: 700, color: 'var(--text-strong)', marginLeft: 'auto' }}>{d.value} <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>({percent}%)</span></span>
                                     </div>
                                 );
                             })}
@@ -438,12 +438,12 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
 
             {/* Section 4: Methodology Section */}
             <section className={styles.methodologySection}>
-                <h3 className={styles.sectionTitle} style={{ color: '#fff' }}>📘 Définitions / Méthodologie KPI</h3>
+                <h3 className={styles.sectionTitle} style={{ color: 'var(--text-strong)' }}>📘 Définitions / Méthodologie KPI</h3>
                 <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                     Tous les indicateurs ci-dessous sont calculés dynamiquement depuis le cache Mantis. <strong>Attention : Le domaine "RDD" est systématiquement exclu des calculs globaux.</strong>
                 </p>
                 <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderLeft: '4px solid var(--color-primary)', borderRadius: '4px' }}>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 600 }}>🔍 Règles de classification des statuts (KPI uniquement)</p>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-strong)', fontWeight: 600 }}>🔍 Règles de classification des statuts (KPI uniquement)</p>
                     <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                         Les indicateurs utilisent une classification métier différente de l'affichage brut Mantis : <br />
                         • <strong>EN COURS :</strong> Nouveau, Accepté, Validation chiffrage, Réalisation, Résolu.<br />

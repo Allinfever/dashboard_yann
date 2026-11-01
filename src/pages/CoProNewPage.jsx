@@ -239,7 +239,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                             );
                         }
                         const color = val.includes('P1') ? 'var(--color-rose)' : val.includes('P2') ? 'var(--color-amber)' : 'var(--color-primary)';
-                        return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.02)' }}>{val}</span>;
+                        return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(var(--fg-rgb),0.02)' }}>{val}</span>;
                     }
                 };
             }
@@ -417,7 +417,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
             </section>
 
             <div className={styles.rulesFooter}>
-                <strong style={{ color: '#fff' }}>Règles communes :</strong>
+                <strong style={{ color: 'var(--text-strong)' }}>Règles communes :</strong>
                 <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>{rulesText}</span>
             </div>
         </div>

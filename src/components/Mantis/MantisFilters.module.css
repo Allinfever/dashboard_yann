@@ -4,8 +4,8 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.02);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-md);
 }
 
@@ -38,8 +38,8 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s;
@@ -48,11 +48,11 @@
 .trigger:hover,
 .triggerOpen {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(var(--fg-rgb), 0.07);
 }
 
 .triggerActive {
-    color: #fff;
+    color: var(--text-strong);
     border-color: rgba(59, 130, 246, 0.5);
     background: rgba(59, 130, 246, 0.12);
 }
@@ -81,8 +81,8 @@
     width: 280px;
     max-width: calc(100vw - 2rem);
     padding: 0.75rem;
-    background: #141725;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--surface-popover);
+    border: 1px solid rgba(var(--fg-rgb), 0.1);
     border-radius: 10px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
@@ -98,8 +98,8 @@
     padding: 0.45rem 0.7rem;
     font-size: 0.82rem;
     color: var(--text-main);
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(var(--well-rgb), 0.3);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
     border-radius: 6px;
     outline: none;
     box-sizing: border-box;
@@ -147,7 +147,7 @@
 }
 
 .option:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.05);
 }
 
 .option input {
@@ -200,11 +200,11 @@
 }
 
 .preset:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.05);
 }
 
 .presetActive {
-    color: #fff;
+    color: var(--text-strong);
     background: rgba(59, 130, 246, 0.2);
 }
 
@@ -227,8 +227,8 @@
     padding: 0.35rem 0.4rem;
     font-size: 0.8rem;
     color: var(--text-main);
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(var(--well-rgb), 0.3);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
     border-radius: 6px;
     color-scheme: dark;
 }
@@ -247,7 +247,7 @@
     gap: 0.4rem;
     padding: 0.3rem 0.5rem 0.3rem 0.7rem;
     font-size: 0.78rem;
-    color: #dbeafe;
+    color: var(--text-strong);
     background: rgba(59, 130, 246, 0.15);
     border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 999px;

@@ -9,12 +9,13 @@ import styles from './MantisStats.module.css';
 const PRIORITY_COLORS = { P1: '#e34948', P2: '#eda100', P3: '#3b82f6', 'Non renseignée': '#64748b' };
 const FLOW_COLORS = { created: '#3b82f6', closed: '#10b981' };
 const AXIS = { stroke: '#64748b', fontSize: 11, tickLine: false, axisLine: false };
-const GRID = { stroke: 'rgba(255,255,255,0.06)', vertical: false };
+// SVG attributes can't read CSS variables: neutral grays that work in both themes
+const GRID = { stroke: '#94a3b8', strokeOpacity: 0.2, vertical: false };
 const TOOLTIP = {
-    contentStyle: { backgroundColor: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8, fontSize: 12 },
-    itemStyle: { color: '#f8fafc' },
+    contentStyle: { backgroundColor: 'var(--surface-popover)', border: '1px solid rgba(var(--fg-rgb), 0.15)', borderRadius: 8, fontSize: 12 },
+    itemStyle: { color: 'var(--text-main)' },
     labelStyle: { color: '#94a3b8', fontWeight: 600 },
-    cursor: { fill: 'rgba(255,255,255,0.04)' }
+    cursor: { fill: '#94a3b8', fillOpacity: 0.08 }
 };
 
 const Legend = ({ items }) => (
@@ -156,7 +157,7 @@ const MantisStats = ({ data, source = 'recette' }) => {
                             <CartesianGrid {...GRID} />
                             <XAxis dataKey="label" {...AXIS} />
                             <YAxis allowDecimals={false} width={30} {...AXIS} />
-                            <Tooltip {...TOOLTIP} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
+                            <Tooltip {...TOOLTIP} cursor={{ stroke: '#94a3b8', strokeOpacity: 0.4 }} />
                             <Line type="monotone" dataKey="created" name="Créés" stroke={FLOW_COLORS.created} strokeWidth={2} dot={{ r: 3 }} />
                             <Line type="monotone" dataKey="closed" name="Clôturés" stroke={FLOW_COLORS.closed} strokeWidth={2} strokeDasharray="5 4" dot={{ r: 3 }} />
                         </LineChart>

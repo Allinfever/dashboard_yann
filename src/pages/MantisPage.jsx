@@ -187,7 +187,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                             );
                         }
                         const color = val.includes('P1') ? 'var(--color-rose)' : val.includes('P2') ? 'var(--color-amber)' : 'var(--color-primary)';
-                        return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.02)' }}>{val}</span>;
+                        return <span style={{ fontWeight: '800', color, border: `1px solid ${color}`, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(var(--fg-rgb),0.02)' }}>{val}</span>;
                     }
                 };
             }
@@ -272,8 +272,8 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                 <div>
                     <DataTable data={displayedData} columns={columns} storageKey="mantis_all_mantis_column_order" tabId={currentTab} />
                     {currentTabConfig.rulesText && (
-                        <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
-                            <strong style={{ color: '#fff' }}>Règles de sélection :</strong>
+                        <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(var(--fg-rgb),0.03)', borderRadius: '12px', border: '1px solid rgba(var(--fg-rgb),0.05)', fontSize: '0.85rem' }}>
+                            <strong style={{ color: 'var(--text-strong)' }}>Règles de sélection :</strong>
                             <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>{currentTabConfig.rulesText}</span>
                         </div>
                     )}

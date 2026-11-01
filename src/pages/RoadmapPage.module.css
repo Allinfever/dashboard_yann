@@ -8,36 +8,36 @@
 .header h2 {
     margin: 0;
     font-size: 2rem;
-    color: #fff;
+    color: var(--text-strong);
     font-family: 'Manrope', sans-serif;
 }
 
 .resetBtn {
     padding: 0.6rem 1.25rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.05);
+    border: 1px solid rgba(var(--fg-rgb), 0.1);
     border-radius: var(--border-radius-md);
-    color: #fff;
+    color: var(--text-strong);
     font-weight: 600;
 }
 
 .resetBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.1);
 }
 
 .ganttContainer {
     overflow-x: auto;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-lg);
-    background: rgba(15, 17, 26, 0.4);
+    background: var(--surface-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
 .monthsHeader {
     display: flex;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.03);
+    border-bottom: 2px solid rgba(var(--fg-rgb), 0.05);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -52,7 +52,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 0.75rem;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(var(--fg-rgb), 0.05);
     display: flex;
     align-items: center;
 }
@@ -70,23 +70,23 @@
     font-weight: 700;
     font-size: 0.8rem;
     color: var(--text-secondary);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(var(--fg-rgb), 0.05);
 }
 
 .monthCell:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(var(--fg-rgb), 0.02);
 }
 
 .groupSection {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.05);
 }
 
 .groupHeader {
     padding: 1rem 1.5rem;
     font-weight: 800;
     font-size: 1rem;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-strong);
+    background: rgba(var(--fg-rgb), 0.02);
     border-left: 6px solid;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -94,12 +94,12 @@
 
 .itemRow {
     display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.02);
     transition: background 0.2s;
 }
 
 .itemRow:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(var(--fg-rgb), 0.02);
 }
 
 .itemLabel {
@@ -126,7 +126,7 @@
 }
 
 .gridLine {
-    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(var(--fg-rgb), 0.03);
 }
 
 .bar {
@@ -149,7 +149,7 @@
 }
 
 .barLabel {
-    color: white;
+    color: #fff;
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -175,12 +175,12 @@
     background: linear-gradient(135deg, var(--color-amber), #d97706);
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-    border: 3px solid #0d1117;
+    border: 3px solid var(--surface-popover);
 }
 
 .milestone.dashed::before {
     background: transparent;
-    border: 3px dashed rgba(255, 255, 255, 0.2);
+    border: 3px dashed rgba(var(--fg-rgb), 0.2);
     box-shadow: none;
 }
 
@@ -193,31 +193,31 @@
     font-weight: 800;
     color: var(--text-secondary);
     white-space: nowrap;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(var(--well-rgb), 0.6);
     backdrop-filter: blur(4px);
     padding: 3px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--fg-rgb), 0.1);
 }
 
 /* Modal */
 .modalOverlay {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(var(--well-rgb), 0.8);
     backdrop-filter: blur(10px);
 }
 
 .modal {
-    background: #0d1117;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-popover);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
     padding: 2.5rem;
     border-radius: var(--border-radius-lg);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
 .modal select {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: rgba(var(--well-rgb), 0.3);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
+    color: var(--text-strong);
     padding: 0.75rem;
     border-radius: 8px;
 }

@@ -1,7 +1,7 @@
 .pageTitle {
     margin: 0 0 2rem 0;
     font-size: 2rem;
-    color: #fff;
+    color: var(--text-strong);
     font-family: 'Manrope', sans-serif;
 }
 
@@ -37,17 +37,17 @@
     flex-direction: column;
     gap: 0.75rem;
     padding: 1.25rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-md);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .deadlineChip:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(var(--fg-rgb), 0.06);
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(var(--fg-rgb), 0.1);
 }
 
 .deadlineTop {
@@ -59,7 +59,7 @@
 .deadlineLabel {
     font-weight: 700;
     font-size: 0.9rem;
-    color: #fff;
+    color: var(--text-strong);
 }
 
 .statusBadge {
@@ -98,18 +98,18 @@
 .dateInput {
     flex: 1;
     padding: 0.5rem 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: 6px;
     font-size: 0.85rem;
-    background: rgba(0, 0, 0, 0.2);
-    color: #fff;
+    background: rgba(var(--well-rgb), 0.2);
+    color: var(--text-strong);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .dateInput:focus {
     border-color: var(--color-primary);
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--well-rgb), 0.4);
 }
 
 /* KPI Section */
@@ -125,8 +125,8 @@
 }
 
 .donutCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-lg);
     padding: 2rem;
     position: relative;
@@ -147,7 +147,7 @@
 .donutTitle {
     margin: 0 0 2rem 0;
     font-size: 1.1rem;
-    color: #fff;
+    color: var(--text-strong);
     text-align: center;
     font-weight: 700;
     text-transform: uppercase;
@@ -182,19 +182,19 @@
     transform: translate(-50%, -50%);
     width: 100px;
     height: 100px;
-    background: #0d1117;
+    background: var(--surface-popover);
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
 }
 
 .donutTotal {
     font-size: 2.25rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-strong);
     line-height: 1;
     font-family: 'Manrope', sans-serif;
 }
@@ -225,8 +225,8 @@
 }
 
 .legendItem:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.05);
+    border-color: rgba(var(--fg-rgb), 0.1);
 }
 
 .legendDot {
@@ -245,15 +245,15 @@
 /* Page Level Buttons */
 .resetBtn {
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.05);
+    border: 1px solid rgba(var(--fg-rgb), 0.1);
     border-radius: var(--border-radius-sm);
-    color: #fff;
+    color: var(--text-strong);
     font-size: 0.85rem;
 }
 
 .resetBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.1);
 }
 
 .pageHeader {
@@ -290,7 +290,7 @@
     background: var(--color-primary);
     border: none;
     border-radius: var(--border-radius-md);
-    color: white;
+    color: #fff;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
@@ -304,15 +304,15 @@
 .secondaryBtn {
     padding: 0.8rem 1.5rem;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(var(--fg-rgb), 0.2);
     border-radius: var(--border-radius-md);
-    color: #fff;
+    color: var(--text-strong);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .secondaryBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.05);
 }
 
 /* Global KPIs Section */
@@ -328,8 +328,8 @@
 }
 
 .kpiCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.03);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-lg);
     padding: 1.5rem;
     display: flex;
@@ -339,8 +339,8 @@
 }
 
 .kpiCard:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--fg-rgb), 0.05);
+    border-color: rgba(var(--fg-rgb), 0.1);
 }
 
 .kpiLabel {
@@ -354,7 +354,7 @@
 .kpiValue {
     font-size: 2rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-strong);
     font-family: 'Manrope', sans-serif;
 }
 
@@ -372,8 +372,8 @@
 }
 
 .chartCard {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.02);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-lg);
     padding: 2rem;
 }
@@ -381,7 +381,7 @@
 .chartTitle {
     margin: 0 0 1.5rem 0;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text-strong);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -394,12 +394,12 @@
 
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
-    stroke: rgba(255, 255, 255, 0.05);
+    stroke: rgba(var(--fg-rgb), 0.05);
 }
 
 .recharts-default-tooltip {
-    background-color: #0d1117 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--surface-popover) !important;
+    border: 1px solid rgba(var(--fg-rgb), 0.1) !important;
     border-radius: 8px !important;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
 }
@@ -408,8 +408,8 @@
 .methodologySection {
     margin-top: 4rem;
     padding: 2.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--fg-rgb), 0.02);
+    border: 1px solid rgba(var(--fg-rgb), 0.05);
     border-radius: var(--border-radius-lg);
     margin-bottom: 2rem;
 }
@@ -445,7 +445,7 @@
     font-size: 0.75rem;
     color: var(--text-dim);
     font-family: 'JetBrains Mono', monospace;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(var(--well-rgb), 0.3);
     padding: 4px 10px;
     border-radius: 4px;
     margin-top: 4px;
