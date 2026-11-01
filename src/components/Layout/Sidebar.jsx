@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-    Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, Sun, Moon, ChevronRight, Circle
+    Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, BrainCircuit, Sun, Moon, ChevronRight, Circle
 } from 'lucide-react';
 import { navConfig, navGroups } from '../../config/nav.config';
 import styles from './Sidebar.module.css';
@@ -10,7 +10,7 @@ import classNames from 'classnames';
 const isInSection = (pathname, path) => pathname === path || pathname.startsWith(`${path}/`);
 
 // Icons referenced by name in nav.config.js
-const ICONS = { Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, Sun, Moon };
+const ICONS = { Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, BrainCircuit, Sun, Moon };
 
 const NavIcon = ({ name }) => {
     const Icon = ICONS[name] || Circle;

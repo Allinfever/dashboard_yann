@@ -44,6 +44,13 @@ export const navConfig = [
     tabs: []
   },
   {
+    id: 'dossiers',
+    path: '/dossiers',
+    label: 'Dossiers',
+    icon: 'BrainCircuit',
+    tabs: []
+  },
+  {
     id: 'pilotage',
     path: '/pilotage',
     label: 'Pilotage Recette',

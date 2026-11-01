@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@kenjiuno/msgreader": "^1.29.0",
     "axios": "^1.13.2",
     "axios-cookiejar-support": "^6.0.5",
     "cheerio": "^1.1.2",
@@ -18,7 +19,11 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
+    "mailparser": "^3.14.1",
+    "mammoth": "^1.13.0",
     "multer": "^1.4.5-lts.1",
+    "openai": "^7.47.0",
+    "pdf-parse": "^2.4.5",
     "tough-cookie": "^6.0.0",
     "uuid": "^11.1.0"
   }

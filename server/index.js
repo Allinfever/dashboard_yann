@@ -1639,6 +1639,9 @@ app.delete('/api/documentation/items/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// --- Dossiers (sources + synthèse IA) ---
+require('./dossiers')(app, { DATA_DIR, UPLOADS_ROOT, readCache, mantisSources: MANTIS_SOURCES, MantisClient, fetchFullIssueDetails });
+
 // --- Daily automatic sync (Paris time, MANTIS_AUTO_SYNC_TIME="HH:MM" or "off") ---
 const AUTO_SYNC_TIME = process.env.MANTIS_AUTO_SYNC_TIME || '07:00';
 const parisClock = new Intl.DateTimeFormat('fr-FR', {

@@ -9,6 +9,8 @@ import OpenTopicDetailPage from './pages/OpenTopicDetailPage';
 import DocumentationPage from './pages/DocumentationPage';
 import MantisExtractorPage from './pages/MantisExtractorPage';
 import CoProNewPage from './pages/CoProNewPage';
+import DossiersPage from './pages/DossiersPage';
+import DossierDetailPage from './pages/DossierDetailPage';
 import './App.css';
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
           <Route path="/mantis-demarrage" element={<MantisPage key="demarrage" source="demarrage" title="Mantis Démarrage" />} />
           <Route path="/open-topics" element={<OpenTopicsPage />} />
           <Route path="/open-topics/:id" element={<OpenTopicDetailPage />} />
+          <Route path="/dossiers" element={<DossiersPage />} />
+          <Route path="/dossiers/:id" element={<DossierDetailPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
           <Route path="/mantis-extractor" element={<MantisExtractorPage />} />
           <Route path="/copro-new" element={<CoProNewPage title="CoPro Recette" />} />
