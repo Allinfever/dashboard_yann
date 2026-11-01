@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileStack, ListChecks } from 'lucide-react';
+import { Plus, FileStack, ListChecks, KeyRound } from 'lucide-react';
+import OpenAIKeyDialog from '../components/Dossiers/OpenAIKeyDialog';
 import { ETATS, formatDate } from '../utils/dossierDisplay';
 import styles from './DossiersPage.module.css';
 
@@ -12,6 +13,9 @@ const DossiersPage = () => {
     const [newTitle, setNewTitle] = useState('');
     const [aiStatus, setAiStatus] = useState(null);
     const [search, setSearch] = useState('');
+    const [keyDialogOpen, setKeyDialogOpen] = useState(false);
+
+    const loadAiStatus = () => fetch('/api/dossiers/ai-status').then(res => res.json()).then(setAiStatus).catch(() => {});
 
     useEffect(() => {
         fetch('/api/dossiers')
@@ -19,7 +23,7 @@ const DossiersPage = () => {
             .then(setDossiers)
             .catch(e => setError(e.message))
             .finally(() => setLoading(false));
-        fetch('/api/dossiers/ai-status').then(res => res.json()).then(setAiStatus).catch(() => {});
+        loadAiStatus();
     }, []);
 
     const createDossier = async (e) => {
@@ -66,17 +70,40 @@ const DossiersPage = () => {
                     <h2>Dossiers</h2>
                     <p className={styles.subtitle}>Mails, Teams, Mantis, documents et recherches réunis par sujet, synthétisés par l'IA.</p>
                 </div>
-                <input
-                    className={styles.search}
-                    type="search"
-                    placeholder="Rechercher…"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                />
+                <div className={styles.headerActions}>
+                    <input
+                        className={styles.search}
+                        type="search"
+                        placeholder="Rechercher…"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className={styles.keyBtn}
+                        onClick={() => setKeyDialogOpen(true)}
+                        title={aiStatus?.configured ? `Clé OpenAI active ${aiStatus.keyHint}` : 'Configurer la clé OpenAI'}
+                    >
+                        <KeyRound size={15} aria-hidden="true" />
+                        Clé OpenAI
+                        <span className={styles.keyDot} style={{ background: aiStatus?.configured ? 'var(--color-emerald)' : 'var(--color-rose)' }} />
+                    </button>
+                </div>
             </div>
 
             {aiStatus && !aiStatus.configured && (
-                <div className={styles.warning}>OPENAI_API_KEY n'est pas configurée sur le serveur (.env.local) : les sources seront stockées mais pas analysées.</div>
+                <div className={styles.warning}>
+                    Aucune clé OpenAI : les sources seront stockées mais pas analysées.
+                    <button type="button" className={styles.warningBtn} onClick={() => setKeyDialogOpen(true)}>Ajouter la clé</button>
+                </div>
+            )}
+
+            {keyDialogOpen && (
+                <OpenAIKeyDialog
+                    status={aiStatus}
+                    onClose={() => setKeyDialogOpen(false)}
+                    onSaved={() => { setKeyDialogOpen(false); loadAiStatus(); }}
+                />
             )}
 
             <form className={styles.newForm} onSubmit={createDossier}>

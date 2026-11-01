@@ -190,3 +190,47 @@
     background: rgba(244, 63, 94, 0.08);
     border: 1px solid rgba(244, 63, 94, 0.3);
 }
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.keyBtn {
+    padding: 0.5rem 0.8rem;
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--btn-secondary-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    gap: 0.4rem;
+}
+
+.keyBtn:hover {
+    color: var(--text-strong);
+    border-color: var(--color-primary);
+}
+
+.keyDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.warning {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.warningBtn {
+    padding: 0.3rem 0.7rem;
+    background: var(--color-amber);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    color: #fff;
+    font-size: 0.8rem;
+}

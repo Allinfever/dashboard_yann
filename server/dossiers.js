@@ -21,14 +21,19 @@ const SOURCE_TEXT_LIMIT = 40000;   // per-source analysis
 const CONTEXT_TEXT_PER_SOURCE = 12000; // per source in fiche / chat context
 const CONTEXT_TOTAL_LIMIT = 400000;
 
+// Key saved from the UI (persistent settings file) takes precedence over OPENAI_API_KEY
+let savedApiKey = null;
+const currentApiKey = () => savedApiKey || process.env.OPENAI_API_KEY || null;
+
 let openaiClient = null;
 const getOpenAI = () => {
-    if (!process.env.OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY absente : ajoute-la dans .env.local puis redémarre le serveur');
+    const apiKey = currentApiKey();
+    if (!apiKey) {
+        throw new Error('Clé OpenAI absente : renseigne-la via le bouton « Clé OpenAI » de l\'onglet Dossiers');
     }
-    if (!openaiClient) {
+    if (!openaiClient || openaiClient.apiKey !== apiKey) {
         const OpenAI = require('openai');
-        openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        openaiClient = new OpenAI({ apiKey });
     }
     return openaiClient;
 };
@@ -112,6 +117,21 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
     const DOSSIERS_DIR = path.join(DATA_DIR, 'dossiers');
     const FILES_DIR = path.join(UPLOADS_ROOT, 'dossiers');
     [DOSSIERS_DIR, FILES_DIR].forEach(dir => fs.mkdirSync(dir, { recursive: true }));
+
+    // --- Settings (kept in the data directory, so they survive restarts and deployments) ---
+    const SETTINGS_FILE = path.join(DATA_DIR, 'dossiers_settings.json');
+    const readSettings = () => {
+        try {
+            return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf-8'));
+        } catch {
+            return {};
+        }
+    };
+    const writeSettings = (settings) => {
+        fs.writeFileSync(SETTINGS_FILE + '.tmp', JSON.stringify(settings, null, 2), { mode: 0o600 });
+        fs.renameSync(SETTINGS_FILE + '.tmp', SETTINGS_FILE);
+    };
+    savedApiKey = readSettings().openaiApiKey || null;
 
     // --- Storage: one JSON file per dossier ---
     const dossierFile = (id) => path.join(DOSSIERS_DIR, `${path.basename(id)}.json`);
@@ -489,7 +509,37 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
 
     // --- Routes ---
     app.get('/api/dossiers/ai-status', (req, res) => {
-        res.json({ configured: Boolean(process.env.OPENAI_API_KEY), model: MODEL, modelFast: MODEL_FAST });
+        const key = currentApiKey();
+        res.json({
+            configured: Boolean(key),
+            origin: savedApiKey ? 'saved' : (key ? 'env' : null),
+            keyHint: key ? `…${key.slice(-4)}` : null,
+            model: MODEL,
+            modelFast: MODEL_FAST
+        });
+    });
+
+    // The key is checked against OpenAI before being saved
+    app.put('/api/dossiers/ai-key', async (req, res) => {
+        const apiKey = (req.body?.apiKey || '').trim();
+        if (!apiKey) return res.status(400).json({ error: 'Clé vide' });
+        try {
+            const OpenAI = require('openai');
+            await new OpenAI({ apiKey }).models.list();
+        } catch (e) {
+            return res.status(400).json({ error: `Clé refusée par OpenAI : ${e.message}` });
+        }
+        writeSettings({ ...readSettings(), openaiApiKey: apiKey });
+        savedApiKey = apiKey;
+        res.json({ ok: true, keyHint: `…${apiKey.slice(-4)}` });
+    });
+
+    app.delete('/api/dossiers/ai-key', (req, res) => {
+        const settings = readSettings();
+        delete settings.openaiApiKey;
+        writeSettings(settings);
+        savedApiKey = null;
+        res.json({ ok: true });
     });
 
     app.get('/api/dossiers', (req, res) => {
