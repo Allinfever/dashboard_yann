@@ -10,6 +10,9 @@ import {
 import { ETATS, SOURCE_TYPES, formatDate } from '../utils/dossierDisplay';
 import styles from './DossierDetailPage.module.css';
 
+// Shortcut label: ⌘ on Mac, Ctrl elsewhere (both keys are accepted)
+const SUBMIT_SHORTCUT = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘+Entrée' : 'Ctrl+Entrée';
+
 const TYPE_ICONS = { email: Mail, teams: MessagesSquare, mantis: Bug, document: FileText, tableur: Sheet, web: Globe, image: ImageIcon, note: StickyNote };
 
 const QUICK_PROMPTS = [
@@ -459,7 +462,7 @@ const DossierDetailPage = () => {
                         <div className={styles.dropActions}>
                             <button type="button" className={styles.ghostBtn} onClick={() => fileInputRef.current?.click()}><Paperclip size={14} /> Fichiers</button>
                             <input ref={fileInputRef} type="file" multiple hidden onChange={e => { submitSources({ files: [...e.target.files] }); e.target.value = ''; }} />
-                            <span className={styles.hint}>⌘+Entrée</span>
+                            <span className={styles.hint}>{SUBMIT_SHORTCUT}</span>
                             <button type="button" className={styles.primaryBtn} onClick={addPasted} disabled={uploading || !pasteText.trim()}>
                                 {uploading ? <Loader2 size={14} className={styles.spin} /> : <Upload size={14} />} Ajouter
                             </button>
