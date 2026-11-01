@@ -13,7 +13,7 @@ export const FACETS = [
 
 export const DATE_FIELDS = [
     { field: 'Mis à jour', label: 'Mis à jour' },
-    { field: 'Date de soumission', label: 'Soumis le' }
+    { field: 'Date de soumission', label: 'Créé le' }
 ];
 
 export const DATE_PRESETS = [
