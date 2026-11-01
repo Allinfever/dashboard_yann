@@ -6,6 +6,7 @@ const { CookieJar } = require('tough-cookie');
 const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const ExcelJS = require('exceljs');
 require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
@@ -30,6 +31,19 @@ const logger = {
 };
 
 
+// --- Persistent storage ---
+// Kept outside the deployed folder: each deployment replaces server/ with the Git content
+const DATA_ROOT = process.env.DASHBOARD_DATA_DIR || path.join(os.homedir(), '.dashboard-yann');
+const DATA_DIR = path.join(DATA_ROOT, 'data');
+const UPLOADS_ROOT = path.join(DATA_ROOT, 'uploads');
+
+// Seed missing files from the ones shipped in the repository (never overwrites)
+[[path.join(__dirname, 'data'), DATA_DIR], [path.join(__dirname, 'uploads'), UPLOADS_ROOT]].forEach(([from, to]) => {
+    fs.mkdirSync(to, { recursive: true });
+    if (fs.existsSync(from)) fs.cpSync(from, to, { recursive: true, force: false, errorOnExist: false });
+});
+console.log(`[Storage] Data directory: ${DATA_ROOT}`);
+
 // --- Configuration ---
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
@@ -40,12 +54,12 @@ const priorityCache = new Map();
 const MANTIS_SOURCES = {
     recette: {
         queryId: process.env.MANTIS_SOURCE_QUERY_ID || '1291',
-        cacheFile: path.join(__dirname, 'data/mantis_all_mantis.json')
+        cacheFile: path.join(DATA_DIR, 'mantis_all_mantis.json')
     },
     demarrage: {
         // No saved filter: the whole project is exported, looked up by name
         projectName: 'TORAY - Démarrage',
-        cacheFile: path.join(__dirname, 'data/mantis_demarrage.json')
+        cacheFile: path.join(DATA_DIR, 'mantis_demarrage.json')
     }
 };
 
@@ -299,11 +313,6 @@ async function performProjectExport(mantis, projectName) {
     res = await mantis.request('GET', '/csv_export.php', null, { responseType: 'text' });
     if (typeof res.data === 'string' && res.data.includes('<html')) throw new Error('Export returned HTML');
     return res.data;
-}
-
-// Ensure data dir exists
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
 }
 
 // Helper for cache
@@ -1152,8 +1161,8 @@ app.get('/api/mantis/extract-download/:jobId', (req, res) => {
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
-const TOPICS_FILE = path.join(__dirname, 'data/open_topics.json');
-const UPLOADS_DIR = path.join(__dirname, 'uploads/open-topics');
+const TOPICS_FILE = path.join(DATA_DIR, 'open_topics.json');
+const UPLOADS_DIR = path.join(UPLOADS_ROOT, 'open-topics');
 
 // Ensure directories exist
 [path.dirname(TOPICS_FILE), UPLOADS_DIR].forEach(dir => {
@@ -1380,8 +1389,8 @@ app.delete('/api/open-topics/:id/attachments/:attachmentId', (req, res) => {
 // DOCUMENTATION MODULE - Personal SharePoint
 // ============================================================
 
-const DOC_FILE = path.join(__dirname, 'data/documentation.json');
-const DOC_UPLOADS_DIR = path.join(__dirname, 'uploads/documentation');
+const DOC_FILE = path.join(DATA_DIR, 'documentation.json');
+const DOC_UPLOADS_DIR = path.join(UPLOADS_ROOT, 'documentation');
 
 // Ensure directories exist
 [path.dirname(DOC_FILE), DOC_UPLOADS_DIR].forEach(dir => {
