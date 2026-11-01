@@ -199,7 +199,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
 
     const columns = useMemo(() => {
         if (data.length === 0) return [];
-        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Résumé', 'État', 'Affecté à', 'Mis à jour', 'Domaine (Toray)', 'Catégorie'];
+        const DEFAULT_ORDER = ['Domaine (Toray)', 'État', 'Affecté à', 'priorite_p', 'Résumé', 'Identifiant', 'Mis à jour', 'Catégorie', 'Rapporteur', 'Sévérité', 'Date de soumission', 'Résolution'];
         let allKeys = Object.keys(data[0]);
         let sortedKeys = [...DEFAULT_ORDER.filter(key => allKeys.includes(key))];
         let remainingKeys = allKeys.filter(key => !DEFAULT_ORDER.includes(key));
@@ -360,7 +360,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                     <DataTable
                         data={encoursData}
                         columns={columns}
-                        storageKey={`copro_${source}_encours_column_order_v2`}
+                        storageKey={`copro_${source}_encours_column_order_v3`}
                         tabId={`copro-${source}-encours`}
                         filenamePrefix={`copro_${source}_encours`}
                     />
@@ -389,7 +389,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
                     <DataTable
                         data={resoluesData}
                         columns={columns}
-                        storageKey={`copro_${source}_resolues_column_order_v2`}
+                        storageKey={`copro_${source}_resolues_column_order_v3`}
                         tabId={`copro-${source}-resolues`}
                         filenamePrefix={`copro_${source}_resolues`}
                     />

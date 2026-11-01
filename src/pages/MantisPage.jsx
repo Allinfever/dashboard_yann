@@ -147,7 +147,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
 
     const columns = useMemo(() => {
         if (data.length === 0) return [];
-        const DEFAULT_ORDER = ['Identifiant', 'priorite_p', 'Résumé', 'État', 'Affecté à', 'Mis à jour', 'Domaine (Toray)', 'Catégorie'];
+        const DEFAULT_ORDER = ['Domaine (Toray)', 'État', 'Affecté à', 'priorite_p', 'Résumé', 'Identifiant', 'Mis à jour', 'Catégorie', 'Rapporteur', 'Sévérité', 'Date de soumission', 'Résolution'];
         let allKeys = Object.keys(data[0]);
         let sortedKeys = [...DEFAULT_ORDER.filter(key => allKeys.includes(key))];
         let remainingKeys = allKeys.filter(key => !DEFAULT_ORDER.includes(key));
@@ -273,7 +273,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                 data.length > 0 && <MantisStats data={displayedData} source={source} />
             ) : displayedData.length > 0 ? (
                 <div>
-                    <DataTable data={displayedData} columns={columns} storageKey="mantis_column_order_v2" tabId={currentTab} />
+                    <DataTable data={displayedData} columns={columns} storageKey="mantis_column_order_v3" tabId={currentTab} />
                     {currentTabConfig.rulesText && (
                         <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(var(--fg-rgb),0.03)', borderRadius: '12px', border: '1px solid rgba(var(--fg-rgb),0.05)', fontSize: '0.85rem' }}>
                             <strong style={{ color: 'var(--text-strong)' }}>Règles de sélection :</strong>
