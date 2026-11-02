@@ -151,14 +151,17 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
     };
 
     // Synchronous read-modify-write: safe against concurrent background jobs
-    const mutate = (id, fn) => {
+    const mutate = (id, fn, { touch = true } = {}) => {
         const dossier = readDossier(id);
         if (!dossier) return null;
         fn(dossier);
-        dossier.updatedAt = new Date().toISOString();
+        if (touch) dossier.updatedAt = new Date().toISOString();
         writeDossier(dossier);
         return dossier;
     };
+
+    // Personal priority set by the user (null = « à définir »)
+    const PRIORITIES = [1, 2, 3];
 
     const findSource = (dossier, sourceId) => dossier.sources.find(s => s.id === sourceId);
 
@@ -592,6 +595,14 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
                 id: d.id,
                 title: d.title,
                 status: d.status,
+                priority: d.priority ?? null,
+                order: d.order ?? null,
+                mantis: d.sources
+                    .filter(src => src.mantisId && src.status !== 'error')
+                    .map(src => {
+                        const snap = mantisSnapshot(src.mantisId);
+                        return { id: src.mantisId, etat: snap?.etat || '', resume: snap?.resume || '' };
+                    }),
                 createdAt: d.createdAt,
                 updatedAt: d.updatedAt,
                 sourceCount: d.sources.length,
@@ -603,6 +614,14 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
             }))
             .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
         res.json(list);
+    });
+
+    // Personal ranking: sets the priority group and the order of the given dossiers
+    app.put('/api/dossiers/reorder', (req, res) => {
+        const priority = PRIORITIES.includes(req.body?.priority) ? req.body.priority : null;
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+        ids.forEach((id, index) => mutate(id, d => { d.priority = priority; d.order = index; }, { touch: false }));
+        res.json({ ok: true });
     });
 
     app.post('/api/dossiers', (req, res) => {
@@ -624,10 +643,14 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
         const allowed = ['title', 'status', 'notes'];
         const dossier = mutate(req.params.id, d => {
             allowed.forEach(k => { if (req.body[k] !== undefined) d[k] = req.body[k]; });
+            if (req.body.priority !== undefined) {
+                d.priority = PRIORITIES.includes(req.body.priority) ? req.body.priority : null;
+                d.order = null;
+            }
             if (Array.isArray(req.body.actionsDone) && d.fiche) {
                 d.fiche.actions.forEach((a, i) => { a.statut = req.body.actionsDone.includes(i) ? 'fait' : 'a_faire'; });
             }
-        });
+        }, { touch: Object.keys(req.body).some(k => k !== 'priority') });
         if (!dossier) return res.status(404).json({ error: 'Dossier introuvable' });
         res.json(toView(dossier));
     });
