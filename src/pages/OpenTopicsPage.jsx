@@ -77,7 +77,7 @@ const OpenTopicsPage = () => {
         try {
             await fetch(`/api/open-topics/${id}`, { method: 'DELETE' });
             fetchTopics();
-        } catch (e) {
+        } catch {
             alert('Erreur suppression');
         }
     };
@@ -168,6 +168,7 @@ const OpenTopicsPage = () => {
                 </button>
             )
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleDelete only uses state setters, the columns never go stale
     ], []);
 
     if (loading) {

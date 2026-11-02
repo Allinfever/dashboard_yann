@@ -98,3 +98,23 @@ Les données sont dans `~/.dashboard-yann`, hors du dépôt, donc conservées en
 
 - `data/dossiers/<id>.json` : un fichier par dossier (sources, texte extrait, analyses, fiche, conversation) ;
 - `uploads/dossiers/<id>/` : les fichiers déposés et les pièces jointes extraites des mails.
+
+Une analyse ou une fiche interrompue par un redémarrage, par exemple pendant un déploiement, reprend toute seule au démarrage suivant.
+
+## Sauvegardes
+
+- Chaque nuit à 03:00 (heure de Paris), une archive `.tar.gz` de tout `~/.dashboard-yann` est créée dans `~/.dashboard-yann-backups`. Les 14 dernières sont conservées.
+- Variables :
+  - `BACKUP_TIME` : heure de l'archive, au format `HH:MM`, ou `off` pour la désactiver ;
+  - `BACKUP_KEEP` : nombre d'archives conservées ;
+  - `DASHBOARD_BACKUP_DIR` : dossier des archives.
+- Le lien **Sauvegarde** en bas de la barre latérale télécharge une archive à jour de toutes les données. Son info-bulle indique la date de la dernière archive automatique. Sous Windows, l'archive s'ouvre avec l'Explorateur (Windows 11) ou 7-Zip.
+- Pour restaurer, arrêter le serveur, remplacer `~/.dashboard-yann` par le contenu de l'archive, puis relancer.
+
+## Code
+
+- `server/index.js` : démarrage, branchement des modules, synchronisation Mantis quotidienne.
+- `server/lib/` : stockage, logger, client Mantis et caches.
+- `server/routes/` : une route par domaine (`mantis`, `openTopics`, `documentation`, `dossiers`, `backup`).
+- Côté front, chaque onglet est chargé à la demande (`React.lazy` dans `src/App.jsx`).
+- `npm run lint` doit rester vert : le déploiement GitHub Actions lance lint et build avant de déployer, et s'arrête en cas d'échec.

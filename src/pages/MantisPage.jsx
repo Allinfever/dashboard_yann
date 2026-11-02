@@ -34,6 +34,7 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
         if (isMantisTab && data.length === 0) {
             fetchData();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, [currentTab]);
 
     const fetchData = async () => {

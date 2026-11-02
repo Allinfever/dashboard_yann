@@ -196,3 +196,10 @@ button:active {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Shown while a tab's code is being downloaded */
+.page-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}

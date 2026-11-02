@@ -96,7 +96,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
                 setError(result.error || 'Erreur lors du chargement des KPIs');
                 setErrorCode(result.code);
             }
-        } catch (e) {
+        } catch {
             setError('Impossible de contacter le serveur');
         } finally {
             setLoading(false);
@@ -105,6 +105,7 @@ const PilotagePage = ({ source = 'recette', title = 'Pilotage', mantisPath = '/m
 
     useEffect(() => {
         fetchKPIs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, []);
 
 

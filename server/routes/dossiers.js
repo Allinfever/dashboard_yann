@@ -810,4 +810,17 @@ module.exports = function registerDossiers(app, { DATA_DIR, UPLOADS_ROOT, readCa
         res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
         res.send(md);
     });
+
+    // --- Resume jobs interrupted by a restart (each deployment restarts the server) ---
+    fs.readdirSync(DOSSIERS_DIR)
+        .filter(f => f.endsWith('.json'))
+        .map(f => readDossier(f.replace(/\.json$/, '')))
+        .filter(Boolean)
+        .forEach(dossier => {
+            const stuck = dossier.sources.filter(s => s.status === 'processing');
+            if (stuck.length === 0 && dossier.ficheStatus !== 'updating') return;
+            console.log(`[Dossiers] Reprise de « ${dossier.title} » : ${stuck.length} source(s) interrompue(s)`);
+            stuck.forEach(s => processSource(dossier.id, s.id));
+            scheduleFiche(dossier.id);
+        });
 };

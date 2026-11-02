@@ -75,6 +75,7 @@ const CoProNewPage = ({ source = 'recette', title = 'CoPro' }) => {
 
     useEffect(() => {
         if (data.length === 0) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, []);
 
     const fetchData = async () => {

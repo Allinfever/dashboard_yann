@@ -90,7 +90,7 @@ const buildVisibleColumns = (rows, allColumns) => {
 };
 
 // --- Sortable Header Component ---
-const SortableHeader = ({ header, table }) => {
+const SortableHeader = ({ header }) => {
     const {
         attributes,
         listeners,
@@ -361,7 +361,6 @@ const DataTable = ({
                                             <SortableHeader
                                                 key={header.id}
                                                 header={header}
-                                                table={table}
                                             />
                                         ))}
                                     </SortableContext>

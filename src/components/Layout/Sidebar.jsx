@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-    Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, BrainCircuit, Sun, Moon, ChevronRight, Circle
+    Rocket, Target, Bug, ClipboardList, ChartColumn, ChartLine, CalendarRange, FolderKanban, BookOpen, Download, FolderOpen, BrainCircuit, Sun, Moon, ChevronRight, Circle, HardDriveDownload
 } from 'lucide-react';
 import { navConfig, navGroups } from '../../config/nav.config';
 import styles from './Sidebar.module.css';
@@ -95,6 +95,25 @@ const ThemeToggle = () => {
     );
 };
 
+// Downloads a fresh archive of all the data; the tooltip shows the last nightly archive
+const BackupLink = () => {
+    const [status, setStatus] = useState(null);
+
+    useEffect(() => {
+        fetch('/api/backup/status').then(res => (res.ok ? res.json() : null)).then(setStatus).catch(() => {});
+    }, []);
+
+    const last = status?.last
+        ? `Dernière sauvegarde automatique : ${new Date(status.last.day).toLocaleDateString('fr-FR')} (${status.count} conservées)`
+        : 'Aucune sauvegarde automatique pour l\'instant';
+    return (
+        <a href="/api/backup/download" download className={classNames(styles.navLink, styles.themeToggle)} title={`Télécharger toutes les données.\n${last}`}>
+            <span className={styles.icon}><HardDriveDownload size={16} strokeWidth={1.75} aria-hidden="true" /></span>
+            Sauvegarde
+        </a>
+    );
+};
+
 const Sidebar = () => {
     const topLevel = navConfig.filter(item => !item.group);
 
@@ -111,6 +130,7 @@ const Sidebar = () => {
                 })}
             </nav>
             <div className={styles.footer}>
+                <BackupLink />
                 <ThemeToggle />
             </div>
         </aside>

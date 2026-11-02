@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './DocumentationPage.module.css';
 
 const VIEWS = [
@@ -33,12 +33,14 @@ const DocumentationPage = () => {
 
     useEffect(() => {
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, []);
 
     useEffect(() => {
         if (activeSpaceId) {
             fetchItems();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, [activeSpaceId, activeView, search]);
 
     const fetchData = async () => {
@@ -107,7 +109,7 @@ const DocumentationPage = () => {
                 if (activeSpaceId === id) setActiveSpaceId(null);
                 fetchData();
             }
-        } catch (e) {
+        } catch {
             alert('Erreur suppression');
         }
     };
@@ -164,7 +166,7 @@ const DocumentationPage = () => {
         try {
             await fetch(`/api/documentation/items/${id}`, { method: 'DELETE' });
             fetchItems();
-        } catch (e) {
+        } catch {
             alert('Erreur suppression');
         }
     };

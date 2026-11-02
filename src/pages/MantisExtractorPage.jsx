@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './MantisExtractorPage.module.css';
 
 const MantisExtractorPage = () => {

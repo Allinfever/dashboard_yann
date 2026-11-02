@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { navConfig } from '../../config/nav.config';
 import styles from './TopTabs.module.css';

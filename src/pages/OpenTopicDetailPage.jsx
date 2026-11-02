@@ -18,6 +18,7 @@ const OpenTopicDetailPage = () => {
 
     useEffect(() => {
         fetchTopic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fetch helpers only read what is listed here
     }, [id]);
 
     const fetchTopic = async () => {
@@ -54,7 +55,7 @@ const OpenTopicDetailPage = () => {
                 const updated = await res.json();
                 setTopic(updated);
                 showToast('✓ Enregistré');
-            } catch (e) {
+            } catch {
                 showToast('⚠ Erreur sauvegarde');
             } finally {
                 setSaving(false);
@@ -73,7 +74,7 @@ const OpenTopicDetailPage = () => {
         try {
             await fetch(`/api/open-topics/${id}`, { method: 'DELETE' });
             window.close();
-        } catch (e) {
+        } catch {
             alert('Erreur suppression');
         }
     };
@@ -95,7 +96,7 @@ const OpenTopicDetailPage = () => {
             const result = await res.json();
             setTopic(result.topic);
             showToast('✓ Fichiers ajoutés');
-        } catch (e) {
+        } catch {
             showToast('⚠ Erreur upload');
         } finally {
             setSaving(false);
@@ -112,7 +113,7 @@ const OpenTopicDetailPage = () => {
             const result = await res.json();
             setTopic(result.topic);
             showToast('✓ Fichier supprimé');
-        } catch (e) {
+        } catch {
             showToast('⚠ Erreur suppression');
         }
     };
