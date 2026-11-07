@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import DataTable from '../components/UI/DataTable';
 import CoproSummary from '../components/Mantis/CoproSummary';
 import MantisFilters from '../components/Mantis/MantisFilters';
+import DomainPie from '../components/Mantis/DomainPie';
 import MantisStats from '../components/Mantis/MantisStats';
 import { applyMantisFilters, useMantisFilters } from '../utils/mantisFilters';
 import { mantisTabsConfig } from '../config/mantisTabs.config';
@@ -274,7 +275,13 @@ const MantisPage = ({ source = 'recette', title = 'Mantis' }) => {
                 data.length > 0 && <MantisStats data={displayedData} source={source} />
             ) : displayedData.length > 0 ? (
                 <div>
-                    <DataTable data={displayedData} columns={columns} storageKey="mantis_column_order_v3" tabId={currentTab} />
+                    <DataTable
+                        data={displayedData}
+                        columns={columns}
+                        storageKey="mantis_column_order_v3"
+                        tabId={currentTab}
+                        renderBelow={rows => <DomainPie rows={rows} allRows={data} />}
+                    />
                     {currentTabConfig.rulesText && (
                         <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(var(--fg-rgb),0.03)', borderRadius: '12px', border: '1px solid rgba(var(--fg-rgb),0.05)', fontSize: '0.85rem' }}>
                             <strong style={{ color: 'var(--text-strong)' }}>Règles de sélection :</strong>

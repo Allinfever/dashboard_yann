@@ -150,7 +150,9 @@ const DataTable = ({
     storageKey = 'table_column_order',
     tabId = 'default',
     entityLabel = 'mantis',
-    filenamePrefix = 'mantis'
+    filenamePrefix = 'mantis',
+    // Optional render prop: receives the rows left by the search and the column filters
+    renderBelow
 }) => {
     const [sorting, setSorting] = useState([]);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -301,7 +303,8 @@ const DataTable = ({
     }, [table, columnOrder, columns, tabId, filenamePrefix]);
 
 
-    const filteredCount = table.getFilteredRowModel().rows.length;
+    const filteredRows = table.getFilteredRowModel().rows;
+    const filteredCount = filteredRows.length;
 
     return (
         <div className={styles.tableContainer}>
@@ -437,6 +440,7 @@ const DataTable = ({
                     ))}
                 </select>
             </div>
+            {renderBelow && renderBelow(filteredRows.map(r => r.original))}
         </div>
     );
 };

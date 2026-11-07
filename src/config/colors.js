@@ -25,3 +25,9 @@ export const FLOW_COLORS = {
 
 // Sequential scale for magnitudes (heatmaps): one hue, opacity carries the value
 export const HEAT_RGB = '139, 92, 246';
+
+// Categorical palette for domains, most distinct hues first (given to the biggest domains)
+export const DOMAIN_PALETTE = [
+    '#3b82f6', '#f97316', '#10b981', '#f43f5e', '#8b5cf6', '#eab308', '#06b6d4',
+    '#ec4899', '#84cc16', '#a16207', '#14b8a6', '#d946ef', '#1d4ed8', '#78716c'
+];
