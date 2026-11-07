@@ -24,9 +24,8 @@ const MANTIS_SOURCES = {
     },
     demarrage: {
         // No saved filter: the whole project is exported, looked up by name
+        // Its CSV export columns (Domaine, Type de développement…) are set in Mantis: Mon compte > Gérer les colonnes
         projectName: 'TORAY - Démarrage',
-        // The project has no "Domaine (Toray)" field: the domain is the summary prefix ("SD - ...")
-        deriveDomainFromSummary: true,
         cacheFile: path.join(DATA_DIR, 'mantis_demarrage.json')
     }
 };
@@ -270,23 +269,12 @@ async function performProjectExport(mantis, projectName) {
     return res.data;
 }
 
-const domainFromSummary = (summary) => {
-    const match = (summary || '').match(/^\s*([A-Za-z]{2,4})\s*-/);
-    return match ? match[1].toUpperCase() : '';
-};
-
 // Helper for cache
 const readCache = (source = 'recette') => {
-    const { cacheFile, deriveDomainFromSummary } = MANTIS_SOURCES[source];
+    const { cacheFile } = MANTIS_SOURCES[source];
     if (fs.existsSync(cacheFile)) {
         try {
-            const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
-            if (deriveDomainFromSummary && Array.isArray(cache.data)) {
-                cache.data.forEach(row => {
-                    if (!row['Domaine (Toray)']) row['Domaine (Toray)'] = domainFromSummary(row['Résumé']);
-                });
-            }
-            return cache;
+            return JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
         } catch (e) {
             return null;
         }
